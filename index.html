@@ -284,6 +284,7 @@ button{font-family:inherit;color:inherit;touch-action:manipulation;cursor:pointe
       <button class="btn" id="goStats">📊 התקדמות</button>
     </div>
     <div class="row">
+      <button class="btn green" id="goShare">📤 שיתוף לחברים</button>
       <button class="btn" id="goSettings">⚙️ הגדרות</button>
     </div>
   </section>
@@ -559,7 +560,7 @@ function globalDefs() {
     void dk;
   });
   const lg = (id, stops, v = true) => `<linearGradient id="${id}" x1="0" y1="0" x2="${v ? 0 : 1}" y2="${v ? 1 : 0}">${stops.map((c, i) => `<stop offset="${(i / (stops.length - 1)).toFixed(2)}" stop-color="${c}"/>`).join('')}</linearGradient>`;
-  const defs = `<svg width="0" height="0" style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true"><defs>
+  const defs = `<svg id="gdefs" width="0" height="0" style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true"><defs>
     ${lg('g-rainbow', ['#ef4444', '#f97316', '#facc15', '#22c55e', '#3b82f6', '#a855f7'], false)}
     ${lg('g-gold', ['#fff3b0', '#f5b301', '#c27c0e'])}
     ${lg('bg-pastel', ['#f3e8ff', '#fce7f3'])}
@@ -845,11 +846,11 @@ const PET_SAY = { cat: 'מיאו! 😺', dog: 'הב הב! 🐶', bunny: 'קפץ 
 function petGroup(type, x, y, k = 1) {
   if (!PETS[type]) return '';
   const p = PETS[type]();
-  const fire = type === 'dragon' ? `<g class="fh"><path d="M10,-25 Q18,-30 24,-24 Q20,-26 22,-20 Q17,-24 15,-19 Q13,-23 10,-25 Z" fill="#f97316"/></g>` : '';
+  const fire = type === 'dragon' ? `<g class="fh" opacity="0"><path d="M10,-25 Q18,-30 24,-24 Q20,-26 22,-20 Q17,-24 15,-19 Q13,-23 10,-25 Z" fill="#f97316"/></g>` : '';
   return `<g transform="translate(${x},${y}) scale(${k})"><g class="pet"><g class="pbody"><g class="ptail">${p.tail || '<g></g>'}</g>${p.body}<g class="phead">${p.head}</g></g>` +
-    `<g class="fx"><g class="fh">${heart(-10, -60, 9, '#ff4d8d')}</g><g class="fh">${heart(9, -64, 7, '#f472b6')}</g>${fire}` +
-    `<text class="fz" x="7" y="-46" font-size="11" font-weight="800" fill="#6366f1" font-family="Arial,sans-serif">Zz</text>` +
-    `<g class="fs">${sparkle(-16, -40, 4.5, '#facc15')}${sparkle(16, -46, 4.5, '#facc15')}${sparkle(0, -60, 3.5, '#fff')}</g></g></g></g>`;
+    `<g class="fx"><g class="fh" opacity="0">${heart(-10, -60, 9, '#ff4d8d')}</g><g class="fh" opacity="0">${heart(9, -64, 7, '#f472b6')}</g>${fire}` +
+    `<text class="fz" opacity="0" x="7" y="-46" font-size="11" font-weight="800" fill="#6366f1" font-family="Arial,sans-serif">Zz</text>` +
+    `<g class="fs" opacity="0">${sparkle(-16, -40, 4.5, '#facc15')}${sparkle(16, -46, 4.5, '#facc15')}${sparkle(0, -60, 3.5, '#fff')}</g></g></g></g>`;
 }
 const petSVG = type => `<svg viewBox="-28 -68 56 86" xmlns="http://www.w3.org/2000/svg">${petGroup(type, 0, 0)}</svg>`;
 const PET_ACTS = ['jump', 'love', 'spin', 'sleep', 'wiggle'];
@@ -1227,7 +1228,9 @@ function renderBadges() {
   const got = earnedBadges(), cnt = t => got.filter(b => b.tier === t).length;
   $('#bsum').innerHTML = `<div class="big-emoji">🏅</div><b style="font-size:1.2rem">${got.length} מתוך ${BADGES.length} תגים</b>
     <div class="tiers"><span><i class="dot t-g"></i>${cnt('g')}</span><span><i class="dot t-s"></i>${cnt('s')}</span><span><i class="dot t-b"></i>${cnt('b')}</span></div>
-    <span class="muted">תג ארד = 5 🪙 · כסף = 15 🪙 · זהב = 40 🪙</span>`;
+    <span class="muted">תג ארד = 5 🪙 · כסף = 15 🪙 · זהב = 40 🪙</span>
+    <button class="btn green" id="bShare">📤 לשתף את התגים עם חברים</button>`;
+  $('#bShare').onclick = () => { SND.tap(); openShare(); };
   const groups = [...new Set(BADGES.map(b => b.group))];
   $('#badgeList').innerHTML = groups.map(g => `<h3 class="bgroup">${g}</h3><div class="blist">` + BADGES.filter(b => b.group === g).map(b => {
     const has = !!S.badges[b.id], [c, goal] = b.prog(), pc = Math.min(100, Math.round(100 * c / goal));
@@ -1237,6 +1240,96 @@ function renderBadges() {
   }).join('') + '</div>').join('');
 }
 $('#goBadges').onclick = () => { SND.tap(); go('badges'); };
+
+
+/* ---------- share card (image of the character + badges + coins) ---------- */
+function svgImage(svg, w, h) {
+  const defs = $('#gdefs defs').outerHTML;
+  const full = svg.replace(/^<svg([^>]*)>/, (m, a) => `<svg${a} width="${w}" height="${h}">${defs}`);
+  return new Promise((res, rej) => { const img = new Image(); img.onload = () => res(img); img.onerror = rej; img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(full); });
+}
+function rrect(x, X, Y, W, H, r) { x.beginPath(); x.moveTo(X + r, Y); x.arcTo(X + W, Y, X + W, Y + H, r); x.arcTo(X + W, Y + H, X, Y + H, r); x.arcTo(X, Y + H, X, Y, r); x.arcTo(X, Y, X + W, Y, r); x.closePath(); }
+const FONT = (w, px) => `${w} ${px}px Rubik, "Varela Round", Arial, sans-serif`;
+const TIER_COL = { b: ['#f3c08f', '#cd7f32', '#a0522d'], s: ['#ffffff', '#cbd5e1', '#94a3b8'], g: ['#fff7c2', '#facc15', '#ca8a04'] };
+async function makeShareCard() {
+  try { await document.fonts.load(FONT(800, 40)); } catch (e) {}
+  const W = 1080, H = 1350, c = document.createElement('canvas'); c.width = W; c.height = H;
+  const x = c.getContext('2d');
+  let g = x.createLinearGradient(0, 0, W, H); g.addColorStop(0, '#8b5cf6'); g.addColorStop(.55, '#d946ef'); g.addColorStop(1, '#f472b6');
+  x.fillStyle = g; x.fillRect(0, 0, W, H);
+  x.fillStyle = 'rgba(255,255,255,.18)';
+  [[90, 60, 30], [990, 120, 22], [1010, 1290, 40], [60, 1250, 26], [540, 30, 14]].forEach(([a, b, r]) => { x.beginPath(); x.arc(a, b, r, 0, 7); x.fill(); });
+  x.direction = 'rtl'; x.textAlign = 'center'; x.textBaseline = 'alphabetic';
+  x.fillStyle = '#fff'; x.font = FONT(800, 62); x.fillText('כפל-כיף 🪙', W / 2, 92);
+  x.fillStyle = '#fff'; rrect(x, 50, 125, W - 100, 1135, 50); x.fill();
+  // character
+  const aw = 480, ah = 528, ax = (W - aw) / 2, ay = 152;
+  const img = await svgImage(avatarSVG(S.look), aw * 2, ah * 2);
+  x.save(); rrect(x, ax, ay, aw, ah, 40); x.clip(); x.drawImage(img, ax, ay, aw, ah); x.restore();
+  x.strokeStyle = '#f3e8ff'; x.lineWidth = 8; rrect(x, ax, ay, aw, ah, 40); x.stroke();
+  x.fillStyle = '#2e1065'; x.font = FONT(800, 60); x.fillText(S.name, W / 2, ay + ah + 66);
+  // coins pill + badge totals
+  const got = earnedBadges(), cnt = t => got.filter(b => b.tier === t).length;
+  const pillY = ay + ah + 90;
+  x.fillStyle = '#fff4c2'; rrect(x, 150, pillY, 360, 76, 38); x.fill(); x.strokeStyle = '#f5b301'; x.lineWidth = 4; x.stroke();
+  x.fillStyle = '#7a4b00'; x.font = FONT(800, 40); x.fillText(`🪙 ${F(S.coins)}`, 330, pillY + 52);
+  x.fillStyle = '#f3e8ff'; rrect(x, 570, pillY, 360, 76, 38); x.fill();
+  x.fillStyle = '#5b21b6'; x.fillText(`🏅 ${got.length} תגים`, 750, pillY + 52);
+  // medals
+  const my = pillY + 120;
+  const tiers = [['g', 'זהב'], ['s', 'כסף'], ['b', 'ארד']].map(([t, n]) => `${n} ${cnt(t)}`).join('  ·  ');
+  x.fillStyle = '#6b5b95'; x.font = FONT(600, 30); x.fillText(tiers, W / 2, my);
+  const show = got.slice().sort((a, b) => 'gsb'.indexOf(a.tier) - 'gsb'.indexOf(b.tier) || S.badges[b.id] - S.badges[a.id]).slice(0, 14);
+  if (!show.length) { x.font = FONT(600, 34); x.fillStyle = '#9ca3af'; x.fillText('התגים הראשונים בדרך... 💪', W / 2, my + 90); }
+  const per = 7, r = 46, gap = 122;
+  show.forEach((b, i) => {
+    const row = Math.floor(i / per), inRow = Math.min(per, show.length - row * per), col = i % per;
+    const cx = W / 2 + ((inRow - 1) / 2 - col) * gap, cy = my + 68 + row * 110;
+    const [l, m, d] = TIER_COL[b.tier], rg = x.createRadialGradient(cx - 14, cy - 16, 4, cx, cy, r);
+    rg.addColorStop(0, l); rg.addColorStop(.75, m); x.fillStyle = rg;
+    x.beginPath(); x.arc(cx, cy, r, 0, 7); x.fill(); x.lineWidth = 7; x.strokeStyle = d; x.stroke();
+    x.font = FONT(400, 44); x.textBaseline = 'middle'; x.fillStyle = '#000'; x.fillText(b.icon, cx, cy + 2); x.textBaseline = 'alphabetic';
+  });
+  if (got.length > show.length) { x.font = FONT(700, 28); x.fillStyle = '#6b5b95'; x.fillText(`ועוד ${got.length - show.length} תגים`, W / 2, my + 68 + 110 + 46 + 42); }
+  x.fillStyle = '#6b5b95'; x.font = FONT(600, 32);
+  x.fillText(`פתרתי ${F(answered())} תרגילים  ·  שיא באתגר 60 שניות: ${S.best || 0}`, W / 2, 1228);
+  x.fillStyle = '#fff'; x.font = FONT(800, 40); x.fillText('בואו לשחק גם! מי יאסוף יותר תגים? 🏆', W / 2, 1318);
+  return new Promise(res => c.toBlob(res, 'image/png'));
+}
+function shareText() {
+  const link = /^https?:/.test(location.protocol) ? '\n' + location.href.split('#')[0] : '';
+  return `תראו את ${S.name} שלי בכפל-כיף! 🪙 ${F(S.coins)} מטבעות ו-🏅 ${earnedBadges().length} תגים. מי מצליח לאסוף יותר? 💪${link}`;
+}
+function download(blob) {
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'kefel-kif.png';
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+}
+async function openShare() {
+  modal(`<h2>📤 שיתוף עם חברים</h2><p class="muted">מכינים תמונה...</p>`);
+  let blob;
+  try { blob = await makeShareCard(); } catch (e) { blob = null; }
+  if (!blob) { modal(`<h2>אופס</h2><p>לא הצלחנו ליצור תמונה בדפדפן הזה.</p><button class="btn primary" onclick="closeModal()">סגירה</button>`); return; }
+  const file = new File([blob], 'kefel-kif.png', { type: 'image/png' });
+  const canFile = !!(navigator.canShare && navigator.canShare({ files: [file] }));
+  modal(`<h2>📤 שיתוף עם חברים</h2>
+    <img id="shareImg" alt="התמונה לשיתוף" style="width:100%;border-radius:18px;box-shadow:0 4px 14px rgba(0,0,0,.15)">
+    <button class="btn big green" id="shWa">💬 שליחה בווטסאפ</button>
+    <button class="btn" id="shDl">⬇️ שמירת התמונה</button>
+    <p class="muted" id="shNote">${canFile ? 'בחלון השיתוף בחרו בווטסאפ ובחבר או בקבוצה.' : 'התמונה תישמר במכשיר, ואז ייפתח ווטסאפ – צרפו אליו את התמונה מהגלריה.'}</p>
+    <button class="btn" onclick="closeModal()">סגירה</button>`);
+  $('#shareImg').src = URL.createObjectURL(blob);
+  $('#shDl').onclick = () => { download(blob); $('#shNote').textContent = 'התמונה נשמרה! 📸'; };
+  $('#shWa').onclick = async () => {
+    if (canFile) {
+      try { await navigator.share({ files: [file], text: shareText() }); return; }
+      catch (e) { if (e && e.name === 'AbortError') return; }
+    }
+    download(blob);
+    window.open('https://wa.me/?text=' + encodeURIComponent(shareText()), '_blank');
+    $('#shNote').textContent = 'התמונה נשמרה במכשיר – צרפו אותה להודעה בווטסאפ 📎';
+  };
+}
+$('#goShare').onclick = () => { SND.tap(); openShare(); };
 
 /* ---------- topics ---------- */
 function statLine(id) { const s = S.stats[id]; if (!s || !s.t) return ''; return `<span class="ts">${s.c} מתוך ${s.t} בניסיון ראשון</span>`; }
