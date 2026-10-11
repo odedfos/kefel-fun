@@ -102,6 +102,32 @@ button{font-family:inherit;color:inherit;touch-action:manipulation;cursor:pointe
 @keyframes notes{0%{opacity:0;transform:translateY(6px)}40%{opacity:1}100%{opacity:0;transform:translateY(-12px)}}
 .qpet{position:absolute;top:6px;left:6px;width:60px;cursor:pointer}
 .qpet svg{display:block;width:100%;height:auto}
+/* badges */
+.medal{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;width:58px;height:58px;border-radius:50%;font-size:1.8rem;line-height:1;position:relative;box-shadow:inset 0 -4px 0 rgba(0,0,0,.12),0 2px 0 rgba(0,0,0,.08)}
+.medal.t-b{background:radial-gradient(circle at 35% 30%,#f3c08f,#cd7f32 70%);border:4px solid #a0522d}
+.medal.t-s{background:radial-gradient(circle at 35% 30%,#ffffff,#cbd5e1 70%);border:4px solid #94a3b8}
+.medal.t-g{background:radial-gradient(circle at 35% 30%,#fff7c2,#facc15 70%);border:4px solid #ca8a04}
+.medal.locked{filter:grayscale(1);opacity:.4}
+.bsum{background:#fff;border-radius:22px;padding:14px;text-align:center;box-shadow:0 4px 0 var(--line);display:flex;flex-direction:column;gap:6px}
+.bsum .tiers{display:flex;justify-content:center;gap:16px;font-weight:800;font-size:1.25rem}
+.bsum .tiers span{display:inline-flex;align-items:center;gap:6px}
+.dot{display:inline-block;width:16px;height:16px;border-radius:50%}
+.dot.t-b{background:#cd7f32}.dot.t-s{background:#cbd5e1;box-shadow:inset 0 0 0 2px #94a3b8}.dot.t-g{background:#facc15}
+.bgroup{margin:14px 2px 8px;font-size:1.05rem}
+.blist{display:flex;flex-direction:column;gap:8px}
+.bcard{display:flex;align-items:center;gap:12px;background:#fff;border-radius:18px;padding:10px 12px;box-shadow:0 3px 0 var(--line)}
+.bcard.got{background:linear-gradient(90deg,#fffbeb,#fff)}
+.bcard .bt{flex:1;min-width:0}
+.bcard .bn{font-weight:800;font-size:1.05rem}
+.bcard .bd{font-size:.88rem;color:var(--muted);line-height:1.35}
+.bcard .bp{height:8px;background:#f3e8ff;border-radius:999px;overflow:hidden;margin-top:6px}
+.bcard .bp div{height:100%;background:linear-gradient(90deg,var(--pri2),var(--pink))}
+.bcard .br{font-size:.8rem;font-weight:800;color:#8a5a00;white-space:nowrap}
+.bpop{position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:75;background:#fff;border-radius:22px;padding:10px 16px 10px 14px;display:flex;align-items:center;gap:12px;box-shadow:0 10px 30px rgba(124,58,237,.35);width:min(92vw,400px);animation:bpop .45s cubic-bezier(.2,1.6,.4,1)}
+.bpop .bt{flex:1}.bpop .bh{font-size:.8rem;font-weight:800;color:var(--pink)}.bpop .bn{font-weight:800;font-size:1.1rem}.bpop .bd{font-size:.85rem;color:var(--muted)}
+.bpop.out{animation:bout .3s forwards}
+@keyframes bpop{from{transform:translate(-50%,-120%)}}
+@keyframes bout{to{transform:translate(-50%,-140%);opacity:0}}
 .nametag{position:absolute;bottom:10px;right:50%;transform:translateX(50%);background:rgba(255,255,255,.92);padding:4px 16px;border-radius:999px;font-weight:800;font-size:1.1rem;box-shadow:0 2px 6px rgba(0,0,0,.1);white-space:nowrap}
 .bubble{position:relative;background:#fff;border-radius:18px;padding:12px 16px;font-weight:600;line-height:1.4;box-shadow:0 3px 0 var(--line);text-align:center}
 .bubble:before{content:"";position:absolute;top:-10px;right:50%;transform:translateX(50%);border:10px solid transparent;border-top:0;border-bottom-color:#fff}
@@ -254,7 +280,10 @@ button{font-family:inherit;color:inherit;touch-action:manipulation;cursor:pointe
     <button class="btn big primary" id="goPractice">✏️ פותרים תרגילים ומרוויחים</button>
     <button class="btn big pink" id="goShop">👗 חנות ומלתחה</button>
     <div class="row">
+      <button class="btn gold" id="goBadges">🏅 התגים שלי</button>
       <button class="btn" id="goStats">📊 התקדמות</button>
+    </div>
+    <div class="row">
       <button class="btn" id="goSettings">⚙️ הגדרות</button>
     </div>
   </section>
@@ -274,6 +303,13 @@ button{font-family:inherit;color:inherit;touch-action:manipulation;cursor:pointe
     <div class="qcard" id="qcard"></div>
     <div class="feedback" id="feedback"></div>
     <div id="answerArea"></div>
+  </section>
+
+  <!-- ===== badges ===== -->
+  <section class="screen" id="sc-badges">
+    <div class="topbar"><button class="back" data-go="home">→ חזרה</button><div class="coins"><span class="ic">🪙</span><b class="coinNum">0</b></div></div>
+    <div class="bsum" id="bsum"></div>
+    <div id="badgeList"></div>
   </section>
 
   <!-- ===== shop ===== -->
@@ -446,7 +482,9 @@ const PRESETS = [
    ========================================================= */
 const KEY = 'kefel-kif-v1';
 const freshState = () => ({ created: false, name: '', coins: 15, owned: [], look: { ...DEFAULT_LOOK }, grade: 3,
-  tables: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], sound: true, stats: {}, lastDay: '', best: 0, earnedTotal: 0 });
+  tables: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], sound: true, stats: {}, lastDay: '', best: 0, earnedTotal: 0,
+  badges: {}, streak: 0, bestStreak: 0, facts: [], retryWins: 0, g4count: 0, mixCount: 0, petTaps: 0,
+  days: 0, dayStreak: 0, bestDayStreak: 0, early: false, night: false });
 let S = load();
 function load() {
   let s = null;
@@ -870,7 +908,15 @@ function kefelTip(a, b) {
   return `טיפ: ${x} × ${y} = ${x} × ${y - 1} + ${x}`;
 }
 function genKefel() {
-  const a = P(tables()), b = R(1, 10), p = a * b, r = Math.random(), tip = kefelTip(a, b);
+  const q = genKefelQ(); return q;
+}
+function genKefelQ() {
+  const a = P(tables()), b = R(1, 10), r = Math.random(), q = kefelQ(a, b, r);
+  q.fact = Math.min(a, b) + 'x' + Math.max(a, b);
+  return q;
+}
+function kefelQ(a, b, r) {
+  const p = a * b, tip = kefelTip(a, b);
   if (r < .62) return Math.random() < .5 ? num(ex(`${a} × ${b} = ${SLOT}`), p, tip) : num(ex(`${b} × ${a} = ${SLOT}`), p, tip);
   if (r < .81) return num(ex(`${a} × ${SLOT} = ${p}`), b, tip);
   return num(ex(`${SLOT} × ${a} = ${p}`), b, tip);
@@ -1031,6 +1077,7 @@ document.addEventListener('click', e => { const b = e.target.closest('[data-go]'
 function go(where) {
   if (where === 'home') renderHome();
   if (where === 'topics') renderTopics();
+  if (where === 'badges') renderBadges();
   show(where);
 }
 function modal(html) { $('#mcard').innerHTML = html; $('#modal').classList.remove('hidden'); }
@@ -1055,11 +1102,20 @@ $('#startBtn').onclick = () => {
   S.name = ($('#nameInput').value.trim() || PRESETS[pickIdx].name).slice(0, 14);
   S.created = true; save(); SND.fanfare();
   go('home');
-  if (first) { confetti(); setTimeout(() => toast(`ברוכים הבאים! קיבלתם ${S.coins} מטבעות במתנה 🎁`, 3000), 300); S.lastDay = today(); save(); }
+  if (first) { confetti(); setTimeout(() => toast(`ברוכים הבאים! קיבלתם ${S.coins} מטבעות במתנה 🎁`, 3000), 300); markDay(); }
 };
 
 /* ---------- home ---------- */
-const today = () => new Date().toISOString().slice(0, 10);
+const dayStr = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+const today = () => dayStr(new Date());
+function markDay() { // returns true on the first visit of a new day
+  if (S.lastDay === today()) return false;
+  const y = new Date(); y.setDate(y.getDate() - 1);
+  S.dayStreak = S.lastDay === dayStr(y) ? S.dayStreak + 1 : 1;
+  S.bestDayStreak = Math.max(S.bestDayStreak, S.dayStreak);
+  S.days++; S.lastDay = today(); save();
+  return true;
+}
 function bubbleText() {
   const want = [];
   ['pet', 'head', 'held', 'music', 'outfit', 'hairColor', 'bracelet', 'glasses', 'bg', 'hairStyle', 'neck', 'tattoo'].forEach(c => CAT[c].items.forEach(i => { if (!isOwned(c, i.id)) want.push(i); }));
@@ -1071,6 +1127,7 @@ function bubbleText() {
   return 'בואו נפתור תרגילים ונרוויח מטבעות! 💪';
 }
 function renderHome() {
+  updateBadgeBtn();
   $('#homeStage').innerHTML = avatarSVG(S.look) + `<div class="nametag">${esc(S.name)}</div>`;
   $('#bubble').textContent = bubbleText();
 }
@@ -1080,13 +1137,106 @@ $('#goShop').onclick = () => { SND.tap(); openShop(); };
 $('#goStats').onclick = () => { SND.tap(); showStats(); };
 $('#goSettings').onclick = () => { SND.tap(); showSettings(); };
 $('#homeStage').onclick = () => {
-  if (S.look.pet !== 'none') { petAct($('#homeStage'), P(['love', 'jump', 'spin'])); $('#bubble').textContent = PET_SAY[S.look.pet]; SND.coin(); }
+  if (S.look.pet !== 'none') { petAct($('#homeStage'), P(['love', 'jump', 'spin'])); $('#bubble').textContent = PET_SAY[S.look.pet]; SND.coin(); S.petTaps++; save(); checkBadges(); }
   else { $('#bubble').textContent = bubbleText(); SND.tap(); }
 };
 // the pet does something cute every few seconds
 setInterval(() => {
   ['#homeStage', '#shopStage'].forEach(id => { const el = $(id); if (el && el.offsetParent && Math.random() < .7) petAct(el); });
 }, 4500);
+
+
+/* ---------- badges & achievements ---------- */
+const TIERS = { b: { name: 'ארד', reward: 5 }, s: { name: 'כסף', reward: 15 }, g: { name: 'זהב', reward: 40 } };
+const answered = () => Object.values(S.stats).reduce((a, s) => a + s.t, 0);
+const subjects = () => TOPICS.filter(t => (S.stats[t.id] || {}).t > 0).length;
+const paidWorn = () => Object.keys(S.look).filter(c => CAT[c] && item(c, S.look[c]).price > 0).length;
+const ownedCat = cat => S.owned.some(k => k.startsWith(cat + ':'));
+const B = (group, id, icon, tier, name, desc, prog) => ({ group, id, icon, tier, name, desc, prog });
+const BADGES = [
+  B('תרגילים', 'a1', '👣', 'b', 'צעד ראשון', 'פתרו את התרגיל הראשון', () => [answered(), 1]),
+  B('תרגילים', 'a10', '🌱', 'b', 'מתחממים', 'פתרו 10 תרגילים', () => [answered(), 10]),
+  B('תרגילים', 'a50', '🚲', 'b', 'בתנופה', 'פתרו 50 תרגילים', () => [answered(), 50]),
+  B('תרגילים', 'a100', '💯', 's', 'מאה!', 'פתרו 100 תרגילים', () => [answered(), 100]),
+  B('תרגילים', 'a250', '⚙️', 's', 'מכונת חישוב', 'פתרו 250 תרגילים', () => [answered(), 250]),
+  B('תרגילים', 'a500', '🧠', 'g', 'מחשבון אנושי', 'פתרו 500 תרגילים', () => [answered(), 500]),
+  B('תרגילים', 'a1000', '🏛️', 'g', 'אגדה', 'פתרו 1,000 תרגילים', () => [answered(), 1000]),
+  B('רצפים בלי טעות', 's5', '✋', 'b', 'חמש בשורה', '5 תשובות נכונות ברצף, בלי אף טעות', () => [S.bestStreak, 5]),
+  B('רצפים בלי טעות', 's10', '🔥', 'b', 'רצף לוהט', '10 תשובות נכונות ברצף, בלי אף טעות', () => [S.bestStreak, 10]),
+  B('רצפים בלי טעות', 's25', '☄️', 's', 'על הגל', '25 תשובות נכונות ברצף, בלי אף טעות', () => [S.bestStreak, 25]),
+  B('רצפים בלי טעות', 's50', '🚀', 's', 'בלי לעצור', '50 תשובות נכונות ברצף, בלי אף טעות', () => [S.bestStreak, 50]),
+  B('רצפים בלי טעות', 's100', '🌟', 'g', 'מאה בלי טעות', '100 תשובות נכונות ברצף, בלי אף טעות', () => [S.bestStreak, 100]),
+  B('נושאים', 'sub3', '🧭', 'b', 'סקרנים', 'תרגלו 3 נושאים שונים', () => [subjects(), 3]),
+  B('נושאים', 'sub5', '🗺️', 's', 'חוקרים', 'תרגלו 5 נושאים שונים', () => [subjects(), 5]),
+  B('נושאים', 'sub8', '🌍', 'g', 'יודעי הכל', `תרגלו את כל ${TOPICS.length} הנושאים`, () => [subjects(), TOPICS.length]),
+  B('נושאים', 'mix25', '🎲', 'b', 'אוהבי הפתעות', 'פתרו 25 תרגילים במצב "ערבוב של הכל"', () => [S.mixCount, 25]),
+  B('נושאים', 'g4', '🎓', 's', 'כיתה ד׳ בכיס', 'פתרו 50 תרגילים ברמה של כיתה ד׳', () => [S.g4count, 50]),
+  ...TOPICS.map(t => B('מאסטרים', 'm_' + t.id, t.icon, 's', 'מאסטר ' + t.name, `30 תשובות נכונות בניסיון ראשון ב${t.name}`, () => [(S.stats[t.id] || { c: 0 }).c, 30])),
+  B('מאסטרים', 'facts', '📜', 'g', 'לוח הכפל המלא', 'ענו נכון על כל 55 התרגילים של לוח הכפל (1 עד 10)', () => [S.facts.length, 55]),
+  B('אתגר 60 שניות', 'sp10', '⚡', 'b', 'זריזים', 'השיגו 10 תשובות נכונות באתגר 60 שניות', () => [S.best || 0, 10]),
+  B('אתגר 60 שניות', 'sp20', '🌩️', 's', 'ברק', 'השיגו 20 תשובות נכונות באתגר 60 שניות', () => [S.best || 0, 20]),
+  B('אתגר 60 שניות', 'sp30', '💫', 'g', 'מהירות האור', 'השיגו 30 תשובות נכונות באתגר 60 שניות', () => [S.best || 0, 30]),
+  B('התמדה', 'r10', '💪', 'b', 'לא מוותרים', 'תקנו 10 תשובות בניסיון השני', () => [S.retryWins, 10]),
+  B('התמדה', 'r50', '🦾', 's', 'גיבורי התיקון', 'תקנו 50 תשובות בניסיון השני', () => [S.retryWins, 50]),
+  B('התמדה', 'd3', '📅', 'b', 'חוזרים לשחק', 'שחקו ב-3 ימים שונים', () => [S.days, 3]),
+  B('התמדה', 'ds3', '🔗', 's', 'שלושה ימים ברצף', 'שחקו 3 ימים רצופים', () => [S.bestDayStreak, 3]),
+  B('התמדה', 'ds7', '🗓️', 'g', 'שבוע ברצף', 'שחקו 7 ימים רצופים', () => [S.bestDayStreak, 7]),
+  B('התמדה', 'd30', '🏅', 'g', 'מתמידים', 'שחקו ב-30 ימים שונים', () => [S.days, 30]),
+  B('התמדה', 'early', '🐦', 'b', 'ציפור בוקר', 'פתרו תרגיל לפני 8 בבוקר', () => [S.early ? 1 : 0, 1]),
+  B('התמדה', 'night', '🦉', 'b', 'ינשוף לילה', 'פתרו תרגיל אחרי 9 בערב', () => [S.night ? 1 : 0, 1]),
+  B('מטבעות וחנות', 'c100', '🐷', 'b', 'קופה קטנה', 'הרוויחו 100 מטבעות', () => [S.earnedTotal || 0, 100]),
+  B('מטבעות וחנות', 'c500', '💰', 's', 'אוצר', 'הרוויחו 500 מטבעות', () => [S.earnedTotal || 0, 500]),
+  B('מטבעות וחנות', 'c2000', '🏦', 'g', 'עשירים', 'הרוויחו 2,000 מטבעות', () => [S.earnedTotal || 0, 2000]),
+  B('מטבעות וחנות', 'buy1', '🛍️', 'b', 'קנייה ראשונה', 'קנו פריט ראשון בחנות', () => [S.owned.length, 1]),
+  B('מטבעות וחנות', 'buy10', '👜', 's', 'קונים בגדול', 'קנו 10 פריטים בחנות', () => [S.owned.length, 10]),
+  B('מטבעות וחנות', 'buy40', '🏰', 'g', 'אספנים', 'קנו 40 פריטים בחנות', () => [S.owned.length, 40]),
+  B('מטבעות וחנות', 'fashion', '💃', 's', 'פאשניסטה', 'לבשו 8 פריטים מהחנות בבת אחת', () => [paidWorn(), 8]),
+  B('מטבעות וחנות', 'crown', '👑', 's', 'מלכותי', 'קנו את הכתר', () => [S.owned.includes('head:crown') ? 1 : 0, 1]),
+  B('מטבעות וחנות', 'pet', '🐾', 'b', 'חבר על הכתף', 'אמצו חיית מחמד', () => [ownedCat('pet') ? 1 : 0, 1]),
+  B('מטבעות וחנות', 'band', '🎸', 'b', 'להקה', 'קנו כלי נגינה', () => [ownedCat('music') ? 1 : 0, 1]),
+  B('מטבעות וחנות', 'petTaps', '🤗', 'b', 'חברים הכי טובים', 'לחצו על חיית המחמד 25 פעמים כדי לשחק איתה', () => [S.petTaps, 25]),
+];
+const medal = (b, locked) => `<span class="medal t-${b.tier}${locked ? ' locked' : ''}">${b.icon}</span>`;
+const earnedBadges = () => BADGES.filter(b => S.badges[b.id]);
+const updateBadgeBtn = () => { $('#goBadges').textContent = `🏅 תגים (${earnedBadges().length})`; };
+let badgeQueue = [], badgeShowing = false;
+function checkBadges() {
+  const fresh = BADGES.filter(b => !S.badges[b.id] && (([c, g]) => c >= g)(b.prog()));
+  if (!fresh.length) return;
+  let coins = 0;
+  fresh.forEach(b => { S.badges[b.id] = Date.now(); coins += TIERS[b.tier].reward; });
+  S.coins += coins; S.earnedTotal = (S.earnedTotal || 0) + coins; save(); setCoins(true); updateBadgeBtn();
+  if (fresh.length > 3) badgeQueue.push({ summary: fresh.length, coins, icon: '🏅', tier: 'g' });
+  else badgeQueue.push(...fresh);
+  showNextBadge();
+  checkBadges(); // earning coins can unlock more badges
+}
+function showNextBadge() {
+  if (badgeShowing || !badgeQueue.length) return;
+  badgeShowing = true;
+  const b = badgeQueue.shift(), el = document.createElement('div');
+  el.className = 'bpop';
+  el.innerHTML = b.summary
+    ? `${medal(b)}<div class="bt"><div class="bh">תגים חדשים!</div><div class="bn">קיבלתם ${b.summary} תגים 🎉</div><div class="bd">+${b.coins} 🪙 · כולם מחכים ב"התגים שלי"</div></div>`
+    : `${medal(b)}<div class="bt"><div class="bh">תג ${TIERS[b.tier].name} חדש! +${TIERS[b.tier].reward} 🪙</div><div class="bn">${b.name}</div><div class="bd">${b.desc}</div></div>`;
+  el.onclick = () => { el.remove(); badgeShowing = false; go('badges'); };
+  document.body.appendChild(el); SND.fanfare(); confetti(b.tier === 'g' ? 60 : 25);
+  setTimeout(() => { el.classList.add('out'); setTimeout(() => { el.remove(); badgeShowing = false; showNextBadge(); }, 300); }, 3000);
+}
+function renderBadges() {
+  const got = earnedBadges(), cnt = t => got.filter(b => b.tier === t).length;
+  $('#bsum').innerHTML = `<div class="big-emoji">🏅</div><b style="font-size:1.2rem">${got.length} מתוך ${BADGES.length} תגים</b>
+    <div class="tiers"><span><i class="dot t-g"></i>${cnt('g')}</span><span><i class="dot t-s"></i>${cnt('s')}</span><span><i class="dot t-b"></i>${cnt('b')}</span></div>
+    <span class="muted">תג ארד = 5 🪙 · כסף = 15 🪙 · זהב = 40 🪙</span>`;
+  const groups = [...new Set(BADGES.map(b => b.group))];
+  $('#badgeList').innerHTML = groups.map(g => `<h3 class="bgroup">${g}</h3><div class="blist">` + BADGES.filter(b => b.group === g).map(b => {
+    const has = !!S.badges[b.id], [c, goal] = b.prog(), pc = Math.min(100, Math.round(100 * c / goal));
+    return `<div class="bcard ${has ? 'got' : ''}">${medal(b, !has)}<div class="bt"><div class="bn">${b.name}</div><div class="bd">${b.desc}</div>` +
+      (has ? `<div class="bd">✔ הושג ב-${new Date(S.badges[b.id]).toLocaleDateString('he-IL')}</div>` : goal > 1 ? `<div class="bp"><div style="width:${pc}%"></div></div><div class="bd" dir="ltr" style="text-align:right">${F(Math.min(c, goal))} / ${F(goal)}</div>` : '') +
+      `</div><span class="br">${has ? '' : '+' + TIERS[b.tier].reward + ' 🪙'}</span></div>`;
+  }).join('') + '</div>').join('');
+}
+$('#goBadges').onclick = () => { SND.tap(); go('badges'); };
 
 /* ---------- topics ---------- */
 function statLine(id) { const s = S.stats[id]; if (!s || !s.t) return ''; return `<span class="ts">${s.c} מתוך ${s.t} בניסיון ראשון</span>`; }
@@ -1179,15 +1329,24 @@ function pickChoice(i, btn) {
   onWrong(maxTries);
 }
 const PRAISE = ['כל הכבוד!', 'מעולה!', 'מצוין!', 'וואו!', 'בול!', 'יופי!', 'נהדר!', 'פצצה!', 'מושלם!', 'אלופים!', 'גאונות!'];
-function record(tid, firstTry) {
+function record(tid, firstTry, correct) {
   const s = S.stats[tid] || (S.stats[tid] = { c: 0, t: 0 });
   s.t++; if (firstTry) s.c++;
   Q.total++; if (firstTry) Q.correct++;
+  if (firstTry) { S.streak++; S.bestStreak = Math.max(S.bestStreak, S.streak); }
+  if (correct && !firstTry) S.retryWins++;
+  if (correct && Q.cur.fact && !S.facts.includes(Q.cur.fact)) S.facts.push(Q.cur.fact);
+  if (S.grade === 4) S.g4count++;
+  if (Q.topic === 'mix') S.mixCount++;
+  const h = new Date().getHours();
+  if (h < 8 && h >= 4) S.early = true;
+  if (h >= 21 || h < 4) S.night = true;
+  save(); checkBadges();
 }
 function onRight() {
   Q.locked = true;
   const first = Q.tries === 0, base = Q.speed ? 2 : topicById(Q.cur.tid).coins, gain = first ? base : Math.ceil(base / 2);
-  record(Q.cur.tid, first);
+  record(Q.cur.tid, first, true);
   Q.streak = first ? Q.streak + 1 : 0;
   const s = slotEl(); if (s && Q.cur.kind === 'num') s.classList.add('good');
   $('#qcard').classList.add('good');
@@ -1204,11 +1363,11 @@ function onRight() {
   setTimeout(() => { if ($('#sc-quiz').classList.contains('active') && Q.cur === cur && !Q.ended) nextQ(); }, Q.speed ? 450 : 1050);
 }
 function onWrong(maxTries = 2) {
-  Q.tries++; SND.bad(); petAct($('#qpet'), 'wiggle');
+  Q.tries++; S.streak = 0; SND.bad(); petAct($('#qpet'), 'wiggle');
   const fb = $('#feedback'), q = Q.cur, s = slotEl();
   $('#qcard').classList.remove('badc'); void $('#qcard').offsetWidth; $('#qcard').classList.add('badc');
   if (Q.speed) {
-    Q.locked = true; record(q.tid, false); Q.streak = 0;
+    Q.locked = true; record(q.tid, false, false); Q.streak = 0;
     if (s) { s.textContent = q.ans; s.classList.add('reveal'); }
     fb.className = 'feedback bad'; fb.textContent = 'אופס!';
     updateHead();
@@ -1223,7 +1382,7 @@ function onWrong(maxTries = 2) {
     return;
   }
   // reveal
-  Q.locked = true; Q.waiting = true; Q.streak = 0; record(q.tid, false);
+  Q.locked = true; Q.waiting = true; Q.streak = 0; record(q.tid, false, false);
   let ansTxt;
   if (q.kind === 'num') { if (s) { s.textContent = q.ans; s.classList.remove('bad'); s.classList.add('reveal'); } ansTxt = F(q.ans); }
   else { const b = $$('#answerArea .choice')[q.correct]; b.classList.add('reveal'); ansTxt = q.choices[q.correct]; }
@@ -1239,6 +1398,7 @@ function endSpeed() {
   let bonus = 0;
   if (rec && score > 0) { S.best = score; bonus = 10; addCoins(10); }
   save(); SND.fanfare(); if (rec && score > 0) confetti(70);
+  checkBadges();
   modal(`<div class="big-emoji">${rec && score > 0 ? '🏆' : '⏱️'}</div><h2>${rec && score > 0 ? 'שיא חדש!' : 'הזמן נגמר!'}</h2>
     <p style="font-size:1.2rem"><b>${score}</b> תשובות נכונות מתוך ${Q.total}</p>
     <p>הרווחתם <b>${Q.earned + bonus}</b> 🪙${bonus ? ' (כולל בונוס שיא +10)' : ''}</p>
@@ -1286,7 +1446,7 @@ function renderShop() {
   renderPv();
 }
 function tapItem(cat, id) {
-  if (isOwned(cat, id)) { S.look = withItem(S.look, cat, id); preview = null; save(); SND.tap(); }
+  if (isOwned(cat, id)) { S.look = withItem(S.look, cat, id); preview = null; save(); SND.tap(); checkBadges(); }
   else { preview = { cat, id }; SND.tap(); }
   renderShop();
 }
@@ -1310,6 +1470,7 @@ function buy() {
   toast(`יש! ${it.name} עכשיו שלך 🎉`);
   renderShop();
   petAct($('#shopStage'), 'love');
+  checkBadges();
 }
 $('#shopBack').onclick = () => { SND.tap(); preview = null; go('home'); };
 
@@ -1349,7 +1510,8 @@ globalDefs();
 if (!S.created) { renderPick(); show('pick'); }
 else {
   go('home');
-  if (S.lastDay !== today()) { S.lastDay = today(); save(); setTimeout(() => { addCoins(10); toast('☀️ בונוס יומי! +10 מטבעות'); }, 500); }
+  if (markDay()) setTimeout(() => { addCoins(10); toast('☀️ בונוס יומי! +10 מטבעות'); }, 500);
+  setTimeout(checkBadges, 1200); // also awards badges earned before they existed
 }
 </script>
 </body>
