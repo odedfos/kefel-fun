@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#a855f7">
 <title>כפל-כיף – משחק לוח הכפל</title>
-<meta name="description" content="משחק לתרגול לוח הכפל וחשבון לכיתות ג׳-ד׳: פותרים תרגילים, מרוויחים מטבעות זהב ומלבישים את הדמות!">
+<meta name="description" content="משחק לתרגול חשבון ומתמטיקה לכיתות ב׳-ט׳: פותרים תרגילים, מרוויחים מטבעות זהב ומלבישים את הדמות!">
 <meta property="og:title" content="כפל-כיף 🪙 משחק לוח הכפל">
 <meta property="og:description" content="פותרים תרגילים, מרוויחים מטבעות ומלבישים את הדמות!">
 <meta property="og:type" content="website">
@@ -151,8 +151,10 @@ button{font-family:inherit;color:inherit;touch-action:manipulation;cursor:pointe
 .field input:focus{border-color:var(--pri2)}
 
 /* ---------- topics ---------- */
-.seg{display:flex;background:#fff;border-radius:16px;padding:4px;box-shadow:0 2px 0 var(--line)}
-.seg button{flex:1;border:none;background:transparent;padding:10px;border-radius:12px;font-weight:800;font-size:1.05rem;color:var(--muted)}
+.seg{display:flex;background:#fff;border-radius:16px;padding:4px;box-shadow:0 2px 0 var(--line);overflow-x:auto;scrollbar-width:none}
+.seg::-webkit-scrollbar{display:none}
+.seg button.edit{flex:0 0 auto;font-size:1.1rem}
+.seg button{flex:1;white-space:nowrap;border:none;background:transparent;padding:10px;border-radius:12px;font-weight:800;font-size:1.05rem;color:var(--muted)}
 .seg button.on{background:linear-gradient(180deg,#a78bfa,var(--pri));color:#fff}
 .topics{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .topic{border:none;border-radius:22px;background:#fff;padding:14px 10px 12px;text-align:center;box-shadow:0 4px 0 var(--line);display:flex;flex-direction:column;align-items:center;gap:4px;min-height:132px;justify-content:center}
@@ -177,7 +179,7 @@ button{font-family:inherit;color:inherit;touch-action:manipulation;cursor:pointe
 .qtext{font-size:1.3rem;line-height:1.6;font-weight:600}
 .qtext .frac{font-size:1.1em}
 .sub{font-size:1.15rem;font-weight:700;color:var(--muted)}
-.slot{display:inline-block;min-width:1.4em;padding:0 .18em;border-radius:14px;background:#f3e8ff;color:var(--pri);border:3px dashed #c4b5fd;line-height:1.15;vertical-align:middle;transition:background .2s}
+.slot{display:inline-block;direction:ltr;unicode-bidi:isolate;min-width:1.4em;padding:0 .18em;border-radius:14px;background:#f3e8ff;color:var(--pri);border:3px dashed #c4b5fd;line-height:1.15;vertical-align:middle;transition:background .2s}
 .slot:empty:before{content:"?";opacity:.45}
 .slot.good{background:#dcfce7;border-color:#22c55e;border-style:solid;color:var(--good);animation:pop .35s}
 .slot.reveal{background:#ffedd5;border-color:var(--orange);border-style:solid;color:#c2410c}
@@ -190,15 +192,25 @@ button{font-family:inherit;color:inherit;touch-action:manipulation;cursor:pointe
 .frac>span:last-child{padding-top:.04em}
 .frac .slot{font-size:.9em}
 .pie{width:130px;height:130px}
+.clock{width:150px;height:150px}
+.shape{width:min(230px,70vw);height:auto}
+.ex sup{font-size:.6em}
+.ex sup .slot{font-size:1.5em;vertical-align:super}
+.grps{display:flex;flex-wrap:wrap;justify-content:center;gap:8px}
+.grp{background:#fff7ed;border:2px dashed #fdba74;border-radius:16px;padding:4px 8px;font-size:1.35rem;line-height:1.2;white-space:nowrap}
+.lines{display:flex;flex-direction:column;align-items:center;gap:4px}
 .feedback{min-height:30px;text-align:center;font-weight:800;font-size:1.15rem}
 .feedback.good{color:var(--good)}
 .feedback.bad{color:var(--bad)}
 .feedback .tip{display:block;font-size:.95rem;font-weight:600;color:var(--muted);margin-top:4px}
-.keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;direction:ltr}
+.kp{display:flex;flex-direction:column;gap:9px;direction:ltr}
+.keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+.keyrow{display:flex;gap:9px}.keyrow .key{flex:1;min-width:0}
 .key{border:none;border-radius:18px;background:#fff;font-size:1.8rem;font-weight:800;height:62px;box-shadow:0 4px 0 var(--line)}
 .key:active{transform:translateY(3px);box-shadow:0 1px 0 var(--line)}
 .key.ok{background:linear-gradient(180deg,#86efac,#22c55e);color:#053b17;box-shadow:0 4px 0 #15803d}
 .key.del{background:#ffe4e6;color:#9f1239;font-size:1.5rem}
+.key.sym{background:#e0f2fe;color:#075985}
 .choices{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .choices.three{grid-template-columns:repeat(3,1fr);direction:ltr}
 .choice{border:3px solid transparent;border-radius:20px;background:#fff;font-size:1.8rem;font-weight:800;min-height:80px;padding:8px;box-shadow:0 4px 0 var(--line)}
@@ -249,6 +261,9 @@ button{font-family:inherit;color:inherit;touch-action:manipulation;cursor:pointe
 .chips{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;direction:ltr}
 .chip{border:3px solid var(--line);background:#fff;border-radius:14px;font-size:1.3rem;font-weight:800;height:52px}
 .chip.on{background:var(--pri);border-color:var(--pri);color:#fff}
+.gchips{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.gpick{display:flex;flex-direction:column;gap:8px;font-weight:600}
+.gpick[hidden]{display:none}
 .stat{display:flex;align-items:center;gap:10px;font-weight:600}
 .stat .nm{flex:0 0 42%}
 .stat .bar{flex:1;height:12px;background:#f3e8ff;border-radius:999px;overflow:hidden}
@@ -274,6 +289,7 @@ button{font-family:inherit;color:inherit;touch-action:manipulation;cursor:pointe
     <label class="field">איך קוראים לדמות?
       <input id="nameInput" maxlength="14" autocomplete="off">
     </label>
+    <div class="gpick" id="pickGrades" hidden>באיזו כיתה? (אפשר לבחור כמה)<div id="pickGradeChips"></div></div>
     <button class="btn big primary" id="startBtn">יאללה, מתחילים! 🚀</button>
   </section>
 
@@ -297,7 +313,7 @@ button{font-family:inherit;color:inherit;touch-action:manipulation;cursor:pointe
   <!-- ===== topics ===== -->
   <section class="screen" id="sc-topics">
     <div class="topbar"><button class="back" data-go="home">→ חזרה</button><div class="coins"><span class="ic">🪙</span><b class="coinNum">0</b></div></div>
-    <div class="seg" id="gradeSeg"><button data-g="3">כיתה ג׳</button><button data-g="4">כיתה ד׳</button></div>
+    <div class="seg" id="gradeSeg"></div>
     <div class="topics" id="topicGrid"></div>
   </section>
 
@@ -488,8 +504,9 @@ const PRESETS = [
    ========================================================= */
 const KEY = 'kefel-kif-v1';
 const freshState = () => ({ created: false, name: '', coins: 15, owned: [], look: { ...DEFAULT_LOOK }, grade: 3,
+  grades: [], gradesSet: false, gradeCount: {},
   tables: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], sound: true, stats: {}, lastDay: '', best: 0, earnedTotal: 0,
-  badges: {}, streak: 0, bestStreak: 0, facts: [], retryWins: 0, g4count: 0, mixCount: 0, petTaps: 0,
+  badges: {}, streak: 0, bestStreak: 0, facts: [], retryWins: 0, mixCount: 0, petTaps: 0,
   days: 0, dayStreak: 0, bestDayStreak: 0, early: false, night: false });
 let S = load();
 function load() {
@@ -497,7 +514,15 @@ function load() {
   try { s = JSON.parse(localStorage.getItem(KEY)); } catch (e) {}
   const base = freshState();
   if (!s || typeof s !== 'object') return base;
-  return { ...base, ...s, look: { ...DEFAULT_LOOK, ...(s.look || {}) } };
+  const o = { ...base, ...s, look: { ...DEFAULT_LOOK, ...(s.look || {}) } };
+  if (!s.gradeCount) { // before grades ב׳–ט׳ there were only ג׳ and ד׳, and only ד׳ was counted
+    const all = Object.values(o.stats).reduce((a, x) => a + x.t, 0), g4 = s.g4count || 0;
+    o.gradeCount = { 3: Math.max(0, all - g4), 4: g4 };
+    delete o.g4count;
+  }
+  if (!o.grades.length && o.created) o.grades = [3, 4];
+  if (o.grades.length && !o.grades.includes(o.grade)) o.grade = o.grades[0];
+  return o;
 }
 function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
 const isOwned = (cat, id) => item(cat, id).price === 0 || S.owned.includes(cat + ':' + id);
@@ -900,6 +925,31 @@ const num = (html, ans, tip) => ({ kind: 'num', html, ans, tip });
 const choice = (html, choices, correct, opts = {}) => ({ kind: 'choice', html, choices, correct, ...opts });
 const word = (text, ans, tip) => num(`<div class="qtext">${text}</div>`, ans, tip);
 const tables = () => (S.tables && S.tables.length ? S.tables : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+const GRADES = [2, 3, 4, 5, 6, 7, 8, 9];
+const GN = { 2: 'ב׳', 3: 'ג׳', 4: 'ד׳', 5: 'ה׳', 6: 'ו׳', 7: 'ז׳', 8: 'ח׳', 9: 'ט׳' };
+const rnd = x => Math.round(x * 1e6) / 1e6;
+const sn = n => (n < 0 ? '−' + F(-n) : F(n)); // signed number with a real minus sign
+const pn = n => (n < 0 ? `(${sn(n)})` : sn(n)); // negative numbers in brackets inside an expression
+const gcd = (a, b) => (b ? gcd(b, a % b) : Math.abs(a));
+const lcm = (a, b) => a / gcd(a, b) * b;
+const nz = (a, b) => { let n; do n = R(a, b); while (n === 0); return n; };
+// terms [[coef, 'x'], [coef, '']] → "2x − 3y + 5"
+function expr(terms) {
+  return terms.filter(([c]) => c !== 0).map(([c, v = ''], i) => {
+    const a = Math.abs(c), body = (a === 1 && v ? '' : F(a)) + v;
+    return i === 0 ? (c < 0 ? '−' : '') + body : (c < 0 ? ' − ' : ' + ') + body;
+  }).join('') || '0';
+}
+const X2 = 'x<sup>2</sup>';
+const bin = p => `(x ${p < 0 ? '−' : '+'} ${Math.abs(p)})`;
+// one right answer + wrong ones (duplicates dropped), shuffled
+function choiceOf(html, right, wrongs, opts = {}) {
+  const all = [String(right)];
+  wrongs.map(String).forEach(w => { if (!all.includes(w) && all.length < (opts.n || 4)) all.push(w); });
+  const order = shuffle(all.map((_, i) => i));
+  return choice(html, order.map(i => all[i]), order.indexOf(0), opts);
+}
+const fracTxt = (n, d) => { const g = gcd(n, d); return d / g === 1 ? String(n / g) : frac(n / g, d / g); };
 
 function kefelTip(a, b) {
   const p = a * b, [x, y] = [Math.min(a, b), Math.max(a, b)];
@@ -926,6 +976,17 @@ function kefelQ(a, b, r) {
   if (r < .81) return num(ex(`${a} × ${SLOT} = ${p}`), b, tip);
   return num(ex(`${SLOT} × ${a} = ${p}`), b, tip);
 }
+const GRP = ['🍎', '⭐', '🍪', '🎈', '🐟', '🌸'];
+function genKefel2() {
+  const a = P([2, 3, 4, 5, 10]), r = Math.random();
+  if (r < .2) { const b = R(2, 4), k = R(2, 5), e = P(GRP);
+    return num(`<div class="sub">כמה ${e} יש בסך הכל?</div><div class="grps">${`<span class="grp">${e.repeat(k)}</span>`.repeat(b)}</div>`, b * k, `${b} קבוצות של ${k}: ${b} × ${k}`); }
+  if (r < .45) { const b = R(2, a === 10 ? 5 : 4);
+    return num(ex(`${Array(b).fill(a).join(' + ')} = ${SLOT}`), a * b, `${b} פעמים ${a}: ${b} × ${a}`); }
+  if (r < .55) { const b = R(2, 4); return num(ex(`${Array(b).fill(a).join(' + ')} = ${b} × ${SLOT}`), a, `סופרים: כמה מוסיפים כל פעם?`); }
+  if (r < .7) { const k = R(1, 10); return num(`<div class="qtext">כמה זה פי 2 מ-${k}?</div>`, 2 * k, `${k} + ${k}`); }
+  const b = R(1, 10); return Math.random() < .5 ? num(ex(`${a} × ${b} = ${SLOT}`), a * b, kefelTip(a, b)) : num(ex(`${b} × ${a} = ${SLOT}`), a * b, kefelTip(a, b));
+}
 function genDiv() {
   let a = P(tables()); if (a === 1 && Math.random() < .7) a = R(2, 10);
   const b = R(1, 10), p = a * b, tip = `חשבו: ${a} × ? = ${p}`;
@@ -933,6 +994,13 @@ function genDiv() {
   return num(ex(`${p} : ${SLOT} = ${b}`), a, `חשבו: ${b} × ? = ${p}`);
 }
 function genAddSub(g) {
+  if (g === 2) {
+    const r = Math.random();
+    if (r < .2) { const x = R(1, 8) * 10, y = R(1, 9 - x / 10) * 10; return Math.random() < .5 ? num(ex(`${x} + ${y} = ${SLOT}`), x + y) : num(ex(`${x + y} − ${y} = ${SLOT}`), x, 'מחסרים עשרות מעשרות'); }
+    if (r < .55) { const x = R(10, 89), y = R(2, 99 - x); return num(ex(`${x} + ${y} = ${SLOT}`), x + y, 'מחברים עשרות עם עשרות ויחידות עם יחידות'); }
+    if (r < .88) { const x = R(20, 99), y = R(2, x - 5); return num(ex(`${x} − ${y} = ${SLOT}`), x - y, `אפשר לבדוק: התשובה + ${y} = ${x}`); }
+    const t = R(20, 99), x = R(5, t - 5); return num(ex(`${x} + ${SLOT} = ${t}`), t - x, `חשבו: ${t} − ${x}`);
+  }
   const M = g === 4 ? 9999 : 999, lo = g === 4 ? 1000 : 100, r = Math.random();
   if (r < .2) { // round numbers
     const u = g === 4 ? 1000 : 100, x = R(2, 9) * u, y = R(1, 8) * u;
@@ -945,6 +1013,13 @@ function genAddSub(g) {
 }
 function genBigMul(g) {
   const r = Math.random();
+  if (g === 5) {
+    if (r < .3) { const a = R(12, 99), b = R(11, 39); return num(ex(`${a} × ${b} = ${SLOT}`), a * b, `מפרקים: ${a} × ${Math.floor(b / 10) * 10} + ${a} × ${b % 10}`); }
+    if (r < .45) { const a = R(102, 999), b = R(3, 9); return num(ex(`${a} × ${b} = ${SLOT}`), a * b, 'מפרקים למאות, עשרות ויחידות'); }
+    if (r < .7) { const d = R(3, 9), q = R(21, 199); return num(ex(`${F(q * d)} : ${d} = ${SLOT}`), q, `בדיקה: התשובה × ${d} = ${F(q * d)}`); }
+    if (r < .85) { const m = P([10, 100, 1000]), a = R(2, 99) * m; return Math.random() < .5 ? num(ex(`${F(a)} : ${F(m)} = ${SLOT}`), a / m, `מוחקים ${String(m).length - 1} אפסים`) : num(ex(`${a / m} × ${F(m)} = ${SLOT}`), a, `מוסיפים ${String(m).length - 1} אפסים`); }
+    const d = R(12, 25), q = R(3, 30); return num(ex(`${F(q * d)} : ${d} = ${SLOT}`), q, `בדיקה: התשובה × ${d} = ${F(q * d)}`);
+  }
   if (g === 3) {
     if (r < .25) { const a = R(2, 9) * 10, b = R(2, 9); return num(ex(`${a} × ${b} = ${SLOT}`), a * b, `${a / 10} × ${b} = ${a / 10 * b}, ועכשיו מוסיפים 0`); }
     if (r < .5) { const a = R(11, 30), b = R(2, 4); return num(ex(`${a} × ${b} = ${SLOT}`), a * b, `מפרקים: ${Math.floor(a / 10) * 10} × ${b} + ${a % 10} × ${b}`); }
@@ -990,6 +1065,14 @@ function pie(k, d) {
   return s + '</svg>';
 }
 function genFrac(g) {
+  if (g >= 5) return genFracBig(g);
+  if (g === 2) return P([
+    () => { const k = R(1, 10); return num(`<div class="qtext">כמה זה חצי מ-${2 * k}?</div>`, k, `מחלקים את ${2 * k} לשתי קבוצות שוות`); },
+    () => { const k = R(1, 5); return num(`<div class="qtext">כמה זה רבע מ-${4 * k}?</div>`, k, `רבע זה חצי של חצי: ${4 * k} ← ${2 * k} ← ${k}`); },
+    () => { const d = P([2, 4]); return num(`<div class="qtext">כמה ${d === 2 ? 'חצאים' : 'רבעים'} יש בשלם אחד?</div>`, d); },
+    () => { const d = P([2, 4]), k = d === 2 ? 1 : P([1, 3]), wrong = d === 2 ? [[1, 4], [1, 3]] : [[4 - k, 4], [1, 2], [k, 5]];
+      return choiceOf(`<div class="sub">איזה חלק מהפיצה צבוע בצהוב?</div>${pie(k, d)}`, frac(k, d), wrong.map(([n, m]) => frac(n, m)), { n: 3, tip: `סופרים: ${k} חלקים צבועים מתוך ${d}` }); },
+  ])();
   const dens = g === 4 ? [2, 3, 4, 5, 6, 8, 10] : [2, 3, 4, 5, 10];
   const T = [
     () => { const d = P(dens), k = R(1, 10); return num(`<div class="qtext">כמה זה ${frac(1, d)} מ-${d * k}?</div>`, k, `מחלקים את ${d * k} ל-${d} חלקים שווים: ${d * k} : ${d}`); },
@@ -1012,21 +1095,22 @@ function genFrac(g) {
   return P(T)();
 }
 function genNumbers(g) {
-  const M = g === 4 ? 9999 : 999, lo = g === 4 ? 1000 : 100;
-  const places = g === 4 ? [['אלפים', 1000], ['מאות', 100], ['עשרות', 10], ['יחידות', 1]] : [['מאות', 100], ['עשרות', 10], ['יחידות', 1]];
+  const M = g === 4 ? 9999 : g === 2 ? 99 : 999, lo = g === 4 ? 1000 : g === 2 ? 10 : 100;
+  const names = (g === 4 ? ['אלפים', 'מאות', 'עשרות', 'יחידות'] : g === 2 ? ['עשרות', 'יחידות'] : ['מאות', 'עשרות', 'יחידות']);
+  const places = names.map((nm, i) => [nm, 10 ** (names.length - 1 - i)]);
   const T = [
     () => { const n = R(lo, M), [nm, v] = P(places); return num(`<div class="qtext">מה ספרת ה${nm} במספר <b dir="ltr">${F(n)}</b>?</div>`, Math.floor(n / v) % 10); },
-    () => { let n = R(11, M); if (n % 10 === 0) n += R(1, 9); return num(`<div class="qtext">עגלו את <b dir="ltr">${F(n)}</b> לעשרת הקרובה</div>`, Math.round(n / 10) * 10, 'מסתכלים על ספרת היחידות: 5 ומעלה – מעגלים למעלה'); },
-    () => { const parts = g === 4 ? [R(1, 9), R(0, 9), R(0, 9), R(0, 9)] : [R(1, 9), R(0, 9), R(0, 9)];
-      const names = g === 4 ? ['אלפים', 'מאות', 'עשרות', 'יחידות'] : ['מאות', 'עשרות', 'יחידות'];
+    () => { if (g === 2) { const n = R(11, 98); return num(`<div class="qtext">איזה מספר בא אחרי <b>${n}</b>?</div>`, n + 1); }
+      let n = R(11, M); if (n % 10 === 0) n += R(1, 9); return num(`<div class="qtext">עגלו את <b dir="ltr">${F(n)}</b> לעשרת הקרובה</div>`, Math.round(n / 10) * 10, 'מסתכלים על ספרת היחידות: 5 ומעלה – מעגלים למעלה'); },
+    () => { const parts = names.map((_, i) => R(i ? 0 : 1, 9));
       const txt = parts.map((p, i) => `${p} ${names[i]}`); const last = txt.pop();
       return num(`<div class="qtext">איזה מספר יש בו ${txt.join(', ')} ו-${last}?</div>`, Number(parts.join(''))); },
     () => { const x = R(lo, M); let y; const r = Math.random();
-      if (r < .12) y = x; else if (r < .55) { const s = String(x).split(''); const i = R(1, s.length - 1); [s[i], s[i - 1]] = [s[i - 1], s[i]]; y = Number(s.join('')); if (y === x) y = x + P([1, 10, -1]); } else y = x + P([-100, -10, -1, 1, 10, 100]);
+      if (r < .12) y = x; else if (r < .55) { const s = String(x).split(''); const i = R(1, s.length - 1); [s[i], s[i - 1]] = [s[i - 1], s[i]]; y = Number(s.join('')); if (y === x) y = x + P([1, 10, -1]); } else y = x + P(g === 2 ? [-10, -1, 1, 10] : [-100, -10, -1, 1, 10, 100]);
       const opts = ['>', '<', '='];
       return choice(`<div class="sub">בחרו את הסימן המתאים</div>${ex(`${F(x)} ${SLOT} ${F(y)}`)}`, opts, x > y ? 0 : x < y ? 1 : 2); },
     () => { const n = R(10, M); return choice(`<div class="qtext">המספר <b dir="ltr">${F(n)}</b> הוא...</div>`, ['זוגי', 'אי-זוגי'], n % 2, { txt: true, tip: 'מסתכלים רק על ספרת היחידות' }); },
-    () => { const st = P(g === 4 ? [10, 100, 1000] : [1, 10, 100]), n = R(lo, M - st), up = Math.random() < .5 || n - st < 0;
+    () => { const st = P(g === 4 ? [10, 100, 1000] : g === 2 ? [1, 10] : [1, 10, 100]), n = R(lo, M - st), up = Math.random() < .5 || n - st < 0;
       return num(`<div class="qtext">מה המספר ש${up ? 'גדול' : 'קטן'} ב-${F(st)} מ-<b dir="ltr">${F(n)}</b>?</div>`, up ? n + st : n - st); },
   ];
   if (g === 4) T.push(() => { let n = R(101, M); if (n % 100 === 0) n += R(1, 99); return num(`<div class="qtext">עגלו את <b dir="ltr">${F(n)}</b> למאה הקרובה</div>`, Math.round(n / 100) * 100, 'מסתכלים על ספרת העשרות: 5 ומעלה – מעגלים למעלה'); });
@@ -1035,6 +1119,8 @@ function genNumbers(g) {
 const NAMES = [['נועה', 1], ['דני', 0], ['מאיה', 1], ['יואב', 0], ['שירה', 1], ['איתי', 0], ['תמר', 1], ['עומר', 0], ['ליה', 1], ['אורי', 0]];
 const ANIMALS = [['כלב', 'כלבים', 4], ['תרנגולת', 'תרנגולות', 2], ['עכביש', 'עכבישים', 8], ['נמלה', 'נמלים', 6], ['חתול', 'חתולים', 4]];
 function genWord(g) {
+  if (g === 2) return genWord2();
+  if (g >= 5) return genWordBig(g);
   const [N, f] = P(NAMES), G = (m, w) => (f ? w : m), big = g === 4;
   const T = [
     () => { const a = R(3, 9), b = R(3, big ? 12 : 9); return word(`ל${N} יש ${a} קופסאות, ובכל קופסה ${b} עפרונות. כמה עפרונות יש ל${N} בסך הכל?`, a * b, `${a} × ${b}`); },
@@ -1057,17 +1143,410 @@ function genWord(g) {
   return P(T)();
 }
 
+/* ---------- grade ב׳: clock ---------- */
+const L = s => `<span dir="ltr">${s}</span>`;
+function clockSVG(h, m) {
+  let s = '<svg viewBox="-50 -50 100 100" class="clock"><circle r="46" fill="#fff" stroke="#7c3aed" stroke-width="4"/>';
+  for (let i = 0; i < 60; i += 5) { const a = i * Math.PI / 30; s += `<circle cx="${(43 * Math.sin(a)).toFixed(1)}" cy="${(-43 * Math.cos(a)).toFixed(1)}" r="1.2" fill="#c4b5fd"/>`; }
+  for (let i = 1; i <= 12; i++) { const a = i * Math.PI / 6; s += `<text x="${(34 * Math.sin(a)).toFixed(1)}" y="${(-34 * Math.cos(a) + 4).toFixed(1)}" font-size="11" font-weight="800" text-anchor="middle" direction="ltr" fill="#2e1065">${i}</text>`; }
+  const hand = (deg, len, w, c) => `<line x1="0" y1="0" x2="${(len * Math.sin(deg * Math.PI / 180)).toFixed(1)}" y2="${(-len * Math.cos(deg * Math.PI / 180)).toFixed(1)}" stroke="${c}" stroke-width="${w}" stroke-linecap="round"/>`;
+  return s + hand((h % 12 + m / 60) * 30, 21, 5, '#2e1065') + hand(m * 6, 33, 3, '#ec4899') + '<circle r="3.5" fill="#2e1065"/></svg>';
+}
+const hm = (h, m) => L(`${h}:${String(m).padStart(2, '0')}`);
+function genClock() {
+  const h = R(1, 12), m = P([0, 0, 30, 30, 15, 45]), nx = h % 12 + 1, pv = (h + 10) % 12 + 1;
+  const T = [
+    () => choiceOf(`<div class="sub">מה השעה?</div>${clockSVG(h, m)}`, hm(h, m), [hm(m ? m / 5 : 12, h * 5 % 60), hm(nx, m), hm(h, m ? 0 : 30), hm(pv, m)], { txt: true, tip: 'המחוג הקצר מראה את השעה, המחוג הארוך מראה את הדקות' }),
+    () => choiceOf(`<div class="sub">מה השעה?</div>${clockSVG(h, m)}`, hm(h, m), [hm(nx, m), hm(m ? m / 5 : 12, h * 5 % 60), hm(h, (m + 15) % 60)], { txt: true, tip: 'המחוג הקצר מראה את השעה, המחוג הארוך מראה את הדקות' }),
+    () => { const [txt, a] = P([['בשעה אחת', 60], ['בחצי שעה', 30], ['ברבע שעה', 15], ['בשעתיים', 120]]); return num(`<div class="qtext">כמה דקות יש ${txt}?</div>`, a, 'בשעה יש 60 דקות'); },
+    () => { const k = R(1, 5), s = R(1, 12 - k); return num(`<div class="qtext">עכשיו השעה ${hm(s, 0)}. מה תהיה השעה בעוד ${k === 1 ? 'שעה אחת' : k + ' שעות'}?</div>`, s + k, `${s} + ${k}`); },
+    () => { const mm = P([15, 30, 45]); return num(`<div class="sub">כמה דקות נשארו עד השעה ${hm(nx, 0)}?</div>${clockSVG(h, mm)}`, 60 - mm, `בשעה יש 60 דקות: 60 − ${mm}`); },
+  ];
+  return P(T)();
+}
+function genWord2() {
+  const [N, f] = P(NAMES), G = (m, w) => (f ? w : m);
+  return P([
+    () => { const x = R(10, 60), y = R(3, 30); return word(`ל${N} היו ${x} מדבקות. ${G('הוא קיבל', 'היא קיבלה')} עוד ${y} מדבקות. כמה מדבקות יש ל${N} עכשיו?`, x + y, `${x} + ${y}`); },
+    () => { const x = R(12, 40), y = R(2, x - 5); return word(`במסיבה היו ${x} בלונים. ${y} בלונים התפוצצו. כמה בלונים נשארו?`, x - y, `${x} − ${y}`); },
+    () => { const a = P([2, 5, 10]), b = R(2, 5); return word(`בכל שקית יש ${a} סוכריות. כמה סוכריות יש ב-${b} שקיות?`, a * b, `${b} × ${a}`); },
+    () => { const [one, many, l] = P(ANIMALS.filter(a => a[2] <= 4)), n = R(2, 5); return word(`ל${one} יש ${l} רגליים. כמה רגליים יש ל-${n} ${many} ביחד?`, n * l, `${n} × ${l}`); },
+    () => { const x = P([10, 20, 50]), y = R(2, x - 1); return word(`ל${N} היו ${x} ש"ח. ${G('הוא קנה', 'היא קנתה')} ספר ב-${y} ש"ח. כמה כסף נשאר ל${N}?`, x - y, `${x} − ${y}`); },
+    () => { const x = R(8, 20), y = R(8, 20); return word(`בכיתה יש ${x} בנים ו-${y} בנות. כמה ילדים יש בכיתה?`, x + y, `${x} + ${y}`); },
+    () => { const k = R(2, 10); return word(`${N} ${G('חילק', 'חילקה')} ${2 * k} עוגיות שווה בשווה ${G('בינו', 'בינה')} לבין ${G('חבר', 'חברה')}. כמה עוגיות קיבל כל אחד?`, k, `חצי מ-${2 * k}`); },
+    () => { const x = R(5, 15), y = R(5, 15); return word(`על העץ ישבו ${x} ציפורים. הגיעו עוד ${y} ציפורים. כמה ציפורים יש עכשיו על העץ?`, x + y, `${x} + ${y}`); },
+  ])();
+}
+function genWordBig(g) {
+  const [N, f] = P(NAMES), G = (m, w) => (f ? w : m);
+  const T = [
+    () => { const p = R(12, 45), n = R(11, 25); return word(`כרטיס להופעה עולה ${p} ש"ח. כמה יעלו ${n} כרטיסים?`, p * n, `${n} × ${p}`); },
+    () => { const v = P([40, 50, 60, 70, 80, 90]), t = R(2, 6); return word(`מכונית נוסעת במהירות של ${v} קמ"ש. כמה קילומטרים היא תעבור ב-${t} שעות?`, v * t, `דרך = מהירות × זמן: ${v} × ${t}`); },
+    () => { const s = P([30, 40, 45, 50, 60]), k = R(3, 12); return word(`${F(s * k)} ילדים יוצאים לטיול באוטובוסים, ובכל אוטובוס יש ${s} מקומות. כמה אוטובוסים צריך?`, k, `${F(s * k)} : ${s}`); },
+    () => { const n = P([3, 4, 5]), avg = R(70, 92); let xs, last;
+      do { xs = Array.from({ length: n - 1 }, () => R(avg - 15, Math.min(100, avg + 8))); last = avg * n - xs.reduce((a, b) => a + b, 0); } while (last < 50 || last > 100);
+      xs.push(last); shuffle(xs);
+      return word(`הציונים של ${N} במבחנים: <b dir="ltr">${xs.join(', ')}</b>. מה הממוצע?`, avg, `הסכום ${xs.reduce((a, b) => a + b, 0)} חלקי ${n}`); },
+    () => { const d = P([3, 4, 5, 8]), m = R(1, d - 1), k = R(3, 8); return word(`בשכבה יש ${d * k} ילדים. ${frac(m, d)} מהם הגיעו לבית הספר באופניים. כמה ילדים הגיעו באופניים?`, m * k, `${d * k} : ${d} × ${m}`); },
+    () => { const a = R(6, 25), b = R(4, 20); return word(`גינה מלבנית באורך ${a} מטר וברוחב ${b} מטר. כמה מטרים של גדר צריך כדי להקיף אותה?`, 2 * (a + b), `היקף = ${a} + ${b} + ${a} + ${b}`); },
+  ];
+  if (g >= 6) T.push(
+    () => { const p = P([10, 20, 25, 50]), price = P([40, 60, 80, 120, 200, 240]); return word(`חולצה עולה ${price} ש"ח, ויש עליה הנחה של ${p}%. כמה ש"ח משלמים אחרי ההנחה?`, price - price * p / 100, `ההנחה: ${p}% מ-${price} = ${price * p / 100} ש"ח`); },
+    () => { const [a, b] = P([[2, 3], [3, 4], [1, 2], [3, 5], [2, 5]]), k = R(2, 8); return word(`היחס בין מספר הבנים למספר הבנות בחוג הוא ${a}:${b}. בחוג יש ${(a + b) * k} ילדים. כמה בנות יש בחוג?`, b * k, `מחלקים ל-${a + b} חלקים שווים: כל חלק הוא ${k} ילדים`); },
+  );
+  if (g >= 7) T.push(
+    () => { const x = R(2, 15), a = R(2, 6), b = R(2, 20); return word(`${N} ${G('חשב', 'חשבה')} על מספר, ${G('כפל', 'כפלה')} אותו ב-${a} ${G('והוסיף', 'והוסיפה')} ${b}. התוצאה היא ${a * x + b}. על איזה מספר ${G('הוא חשב', 'היא חשבה')}?`, x, L(`${a}x + ${b} = ${a * x + b}`)); },
+    () => { const n = R(5, 40); return word(`הסכום של שלושה מספרים עוקבים הוא ${3 * n + 3}. מה המספר הקטן מביניהם?`, n, L(`x + (x + 1) + (x + 2) = ${3 * n + 3}`)); },
+    () => { const k = R(8, 14), d = R(24, 34); return word(`אבא של ${N} מבוגר ${G('ממנו', 'ממנה')} ב-${d} שנים, וסכום הגילים שלהם הוא ${2 * k + d}. ${G('בן', 'בת')} כמה ${N}?`, k, L(`x + (x + ${d}) = ${2 * k + d}`)); },
+    () => { const t = R(-9, -1), u = R(4, 15); return word(`בבוקר הטמפרטורה הייתה <b dir="ltr">${sn(t)}</b> מעלות, ועד הצהריים היא עלתה ב-${u} מעלות. מה הטמפרטורה בצהריים?`, t + u, L(`${sn(t)} + ${u}`)); },
+    () => { const w = R(3, 12); return word(`האורך של מלבן גדול פי 2 מהרוחב שלו, וההיקף שלו ${6 * w} ס"מ. מה הרוחב של המלבן?`, w, L(`x + 2x + x + 2x = ${6 * w}`)); },
+    () => { const old = P([40, 60, 80, 120, 160, 200]), p = P([10, 20, 25, 50]); return word(`אחרי התייקרות של ${p}%, משחק עולה ${old + old * p / 100} ש"ח. כמה הוא עלה לפני ההתייקרות?`, old, `${old + old * p / 100} ש"ח הם ${100 + p}% מהמחיר הקודם`); },
+  );
+  if (g >= 9) T.push(
+    () => { const n = R(3, 12); return word(`המכפלה של שני מספרים טבעיים עוקבים היא ${n * (n + 1)}. מה המספר הקטן?`, n, L(`x(x + 1) = ${n * (n + 1)}`)); },
+    () => { const a = R(3, 9), d = R(1, 5); return word(`השטח של מלבן הוא ${a * (a + d)} סמ"ר, והאורך שלו גדול מהרוחב ב-${d} ס"מ. מה הרוחב?`, a, L(`x(x + ${d}) = ${a * (a + d)}`)); },
+    () => { const x = R(4, 12), y = R(2, 9); return word(`3 מחברות ו-2 עטים עולים ${3 * x + 2 * y} ש"ח. מחברת אחת ועט אחד עולים יחד ${x + y} ש"ח. כמה עולה מחברת?`, x, L(`3x + 2y = ${3 * x + 2 * y}, x + y = ${x + y}`)); },
+  );
+  return P(T)();
+}
+
+/* ---------- grades ה׳–ו׳ ---------- */
+function genFracBig(g) {
+  const T = [
+    () => { const d = R(2, 9); let n = R(1, d - 1); while (gcd(n, d) > 1) n = R(1, d - 1); const k = R(2, 6);
+      return num(ex(`${frac(n * k, d * k)} = ${frac(SLOT, d)}`), n, `מצמצמים: מחלקים את המונה ואת המכנה ב-${k}`); },
+    () => { const d = R(2, 9), n = R(1, d - 1), k = R(2, 6);
+      return num(ex(`${frac(n, d)} = ${frac(SLOT, d * k)}`), n * k, `מרחיבים: כופלים את המונה ואת המכנה ב-${k}`); },
+    () => { let b, d; do { b = P([2, 3, 4, 5, 6, 8, 10]); d = P([2, 3, 4, 5, 6, 8, 10]); } while (b === d || lcm(b, d) > 30);
+      const a = R(1, b - 1), c = R(1, d - 1), M = lcm(b, d);
+      return num(ex(`${frac(a, b)} + ${frac(c, d)} = ${frac(SLOT, M)}`), a * M / b + c * M / d, `מרחיבים למכנה ${M}: ${frac(a * M / b, M)} + ${frac(c * M / d, M)}`); },
+    () => { let a, b, c, d, M; do { b = P([2, 3, 4, 5, 6, 8, 10]); d = P([2, 3, 4, 5, 6, 8, 10]); a = R(1, b - 1); c = R(1, d - 1); M = lcm(b, d); } while (b === d || M > 30 || a * M / b <= c * M / d);
+      return num(ex(`${frac(a, b)} − ${frac(c, d)} = ${frac(SLOT, M)}`), a * M / b - c * M / d, `מרחיבים למכנה ${M}: ${frac(a * M / b, M)} − ${frac(c * M / d, M)}`); },
+    () => { const d = R(2, 9), n = R(1, d - 1), w = R(1, 5);
+      return num(ex(`${w}${frac(n, d)} = ${frac(SLOT, d)}`), w * d + n, `${w} שלמים הם ${frac(w * d, d)}, ועוד ${frac(n, d)}`); },
+    () => { const d = R(2, 9), n = R(1, d - 1), w = R(1, 6);
+      return num(`<div class="qtext">כמה שלמים יש ב-${frac(w * d + n, d)}?</div>`, w, `${w} × ${d} = ${w * d}, ונשארו עוד ${frac(n, d)}`); },
+    () => { let a, b, c, d; do { b = R(3, 9); d = R(3, 9); a = R(1, b - 1); c = R(1, d - 1); } while (b === d || a * d === c * b);
+      return choice('<div class="sub">איזה שבר גדול יותר?</div>', [frac(a, b), frac(c, d)], a * d > c * b ? 0 : 1, { tip: 'מרחיבים למכנה משותף ומשווים את המונים' }); },
+  ];
+  if (g === 6) T.push(
+    () => { const a = R(1, 5), b = R(a + 1, 9), c = R(1, 5), d = R(c + 1, 9); return num(ex(`${frac(a, b)} × ${frac(c, d)} = ${frac(SLOT, b * d)}`), a * c, 'מונה כפול מונה, מכנה כפול מכנה'); },
+    () => { const d = R(2, 9), n = R(1, d - 1), k = R(1, 6); return num(ex(`${frac(n, d)} × ${d * k} = ${SLOT}`), n * k, `${d * k} : ${d} × ${n}`); },
+    () => { const d = R(2, 6), w = R(2, 9); return num(ex(`${w} : ${frac(1, d)} = ${SLOT}`), w * d, `כמה פעמים ${frac(1, d)} נכנס ב-${w}? בכל שלם יש ${d}`); },
+    () => { const a = R(1, 6), b = R(a + 1, 9), c = R(1, 6), d = R(c + 1, 9); return num(ex(`${frac(a, b)} : ${frac(c, d)} = ${frac(SLOT, b * c)}`), a * d, `כופלים בהופכי: ${frac(a, b)} × ${frac(d, c)}`); },
+    () => { const d = R(3, 9); let n = R(1, d - 1); while (gcd(n, d) > 1) n = R(1, d - 1);
+      return choiceOf(`<div class="qtext">מה המספר ההופכי של ${frac(n, d)}?</div>`, frac(d, n), [frac(n, d), frac(d - n, d), frac(d, n + d)], { tip: 'הופכים את השבר: המונה והמכנה מתחלפים' }); },
+  );
+  return P(T)();
+}
+function genDec(g) {
+  const d1 = () => R(1, 99) / 10, d2 = () => R(1, 999) / 100;
+  const T = [
+    () => { const a = d1(), b = d1(); return num(ex(`${a} + ${b} = ${SLOT}`), rnd(a + b), 'הנקודה מתחת לנקודה: עשיריות עם עשיריות'); },
+    () => { const a = d2(), b = d1(); return num(ex(`${a} + ${b} = ${SLOT}`), rnd(a + b), 'הנקודה מתחת לנקודה, ומשלימים אפסים'); },
+    () => { let a = d1(), b = d1(); if (b > a) [a, b] = [b, a]; if (a === b) a = rnd(a + 1); return num(ex(`${a} − ${b} = ${SLOT}`), rnd(a - b), 'הנקודה מתחת לנקודה'); },
+    () => { const den = P(g === 6 ? [10, 100, 1000] : [10, 100]), n = R(1, den - 1); return num(`<div class="sub">כתבו כמספר עשרוני</div>${ex(`${frac(n, den)} = ${SLOT}`)}`, n / den, den === 10 ? 'עשיריות: ספרה אחת אחרי הנקודה' : den === 100 ? 'מאיות: שתי ספרות אחרי הנקודה' : 'אלפיות: שלוש ספרות אחרי הנקודה'); },
+    () => { const i = R(0, 5), k = R(1, 9); let x = `${i}.${k}`, y;
+      if (Math.random() < .15) y = x + '0'; else { let j; do j = R(10, 99); while (j === k * 10); y = `${i}.${j}`; }
+      if (Math.random() < .5) [x, y] = [y, x];
+      const vx = +x, vy = +y;
+      return choice(`<div class="sub">בחרו את הסימן המתאים</div>${ex(`${x} ${SLOT} ${y}`)}`, ['>', '<', '='], vx > vy ? 0 : vx < vy ? 1 : 2, { tip: 'משלימים אפסים כדי שיהיה אותו מספר ספרות אחרי הנקודה' }); },
+    () => { const a = d2(), m = P([10, 100]), dir = m === 10 ? 'מקום אחד' : 'שני מקומות';
+      return Math.random() < .5 ? num(ex(`${a} × ${m} = ${SLOT}`), rnd(a * m), `בכפל ב-${m} הנקודה זזה ${dir} ימינה`) : num(ex(`${rnd(a * m)} : ${m} = ${SLOT}`), a, `בחילוק ב-${m} הנקודה זזה ${dir} שמאלה`); },
+    () => { const s = (R(1000, 99999) / 1000).toFixed(3), [nm, i] = P([['העשיריות', 1], ['המאיות', 2], ['האלפיות', 3]]);
+      return num(`<div class="qtext">מה ספרת ${nm} במספר <b dir="ltr">${s}</b>?</div>`, +s.split('.')[1][i - 1]); },
+  ];
+  if (g === 6) T.push(
+    () => { const a = R(2, 9) / 10, b = R(2, 9); return num(ex(`${a} × ${b} = ${SLOT}`), rnd(a * b), `${a * 10} × ${b} = ${a * 10 * b}, ואז ספרה אחת אחרי הנקודה`); },
+    () => { const a = R(11, 99) / 10, b = R(2, 9) / 10; return num(ex(`${a} × ${b} = ${SLOT}`), rnd(a * b), 'כופלים בלי הנקודות, ואז סופרים: שתי ספרות אחרי הנקודה'); },
+    () => { const q = R(11, 99) / 10, d = R(2, 9); return num(ex(`${rnd(q * d)} : ${d} = ${SLOT}`), q, `בדיקה: התשובה × ${d} = ${rnd(q * d)}`); },
+    () => { const w = R(2, 12), d = P([0.5, 0.2, 0.25, 0.1]); return num(ex(`${w} : ${d} = ${SLOT}`), rnd(w / d), `כמה פעמים ${d} נכנס ב-${w}?`); },
+    () => { const [n, d] = P([[1, 2], [1, 4], [3, 4], [1, 5], [2, 5], [3, 5], [4, 5], [1, 8], [3, 8], [1, 20], [7, 20], [1, 25], [3, 50]]); return num(`<div class="sub">כתבו כמספר עשרוני</div>${ex(`${frac(n, d)} = ${SLOT}`)}`, rnd(n / d), 'מרחיבים למכנה 10, 100 או 1000'); },
+  );
+  return P(T)();
+}
+const isPrime = n => { if (n < 2) return false; for (let i = 2; i * i <= n; i++) if (n % i === 0) return false; return true; };
+const DIVTIP = { 2: 'ספרת האחדות זוגית', 3: 'סכום הספרות מתחלק ב-3', 4: 'שתי הספרות האחרונות מתחלקות ב-4', 5: 'ספרת האחדות היא 0 או 5', 6: 'מתחלק גם ב-2 וגם ב-3', 9: 'סכום הספרות מתחלק ב-9', 10: 'ספרת האחדות היא 0' };
+function genDivis(g) {
+  const T = [
+    () => { const k = P([2, 3, 4, 5, 6, 9, 10]); let n = R(20, 999); if (Math.random() < .5) n -= n % k;
+      return choice(`<div class="qtext">האם המספר <b>${n}</b> מתחלק ב-${k} בלי שארית?</div>`, ['כן', 'לא'], n % k === 0 ? 0 : 1, { txt: true, tip: `מתחלק ב-${k} אם ${DIVTIP[k]}` }); },
+    () => { const n = P([6, 8, 10, 12, 15, 16, 18, 20, 24, 28, 30, 36]), ds = [];
+      for (let i = 1; i <= n; i++) if (n % i === 0) ds.push(i);
+      return num(`<div class="qtext">כמה מחלקים יש למספר ${n}? (כולל 1 ו-${n})</div>`, ds.length, 'מחפשים זוגות: ' + L(ds.filter(i => i * i <= n).map(i => `${i} × ${n / i}`).join(', '))); },
+    () => { const p = P([2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97]);
+      return choiceOf('<div class="sub">איזה מספר הוא ראשוני?</div>', p, shuffle([9, 15, 21, 25, 27, 33, 35, 39, 45, 49, 51, 55, 57, 63, 65, 69, 77, 81, 85, 87, 91, 93, 95]), { tip: 'למספר ראשוני יש רק שני מחלקים: 1 והמספר עצמו' }); },
+    () => { const k = R(3, 12), n = k * R(3, 12); return num(`<div class="qtext">מה הכפולה של ${k} שבאה מיד אחרי ${n}?</div>`, n + k, `${n} + ${k}`); },
+  ];
+  if (g === 6) T.push(
+    () => { const m = R(2, 12); let x, y; do { x = R(1, 9); y = R(1, 9); } while (x === y || gcd(x, y) > 1 || m * Math.max(x, y) > 120);
+      return num(`<div class="qtext">מה המחלק המשותף הגדול ביותר של ${m * x} ו-${m * y}?</div>`, m, 'המספר הגדול ביותר ששני המספרים מתחלקים בו'); },
+    () => { let a, b; do { a = R(2, 15); b = R(2, 15); } while (a === b || lcm(a, b) > 120 || a % b === 0 || b % a === 0);
+      const mx = Math.max(a, b);
+      return num(`<div class="qtext">מה הכפולה המשותפת הקטנה ביותר של ${a} ו-${b}?</div>`, lcm(a, b), `עוברים על הכפולות של ${mx}: ${L([1, 2, 3, 4].map(i => i * mx).join(', ') + '...')}`); },
+    () => { let fs, n; do { fs = Array.from({ length: R(3, 4) }, () => P([2, 2, 2, 3, 3, 5, 7])).sort((a, b) => a - b); n = fs.reduce((a, b) => a * b); } while (n > 200);
+      const i = R(0, fs.length - 1), rest = fs.filter((_, j) => j !== i).reduce((a, b) => a * b);
+      return num(`<div class="sub">פירוק לגורמים ראשוניים</div>${ex(`${n} = ${fs.map((f, j) => (j === i ? SLOT : f)).join(' × ')}`)}`, fs[i], `${n} : ${rest} = ${fs[i]}`); },
+  );
+  return P(T)();
+}
+const LBL = (x, y, t, a = 'middle') => `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" font-size="17" font-weight="800" fill="#7c3aed" text-anchor="${a}" direction="ltr">${t}</text>`;
+function rectSVG(w, h, lw, lh) {
+  const k = Math.min(170 / w, 100 / h), W = Math.max(36, w * k), H = Math.max(30, h * k), x0 = (240 - W) / 2 - 8, y0 = (140 - H) / 2;
+  return `<svg viewBox="0 0 240 160" class="shape"><rect x="${x0}" y="${y0}" width="${W}" height="${H}" fill="#ede9fe" stroke="#7c3aed" stroke-width="3" rx="2"/>${LBL(x0 + W / 2, y0 + H + 21, lw)}${LBL(x0 + W + 8, y0 + H / 2 + 6, lh, 'start')}</svg>`;
+}
+function triSVG(b, h) {
+  const W = 170, H = Math.max(50, Math.min(110, 170 * h / b)), x0 = 35, y0 = 14 + (110 - H), ax = x0 + W * .35;
+  return `<svg viewBox="0 0 240 160" class="shape"><path d="M${x0},${y0 + H} L${x0 + W},${y0 + H} L${ax},${y0} Z" fill="#fef3c7" stroke="#d97706" stroke-width="3" stroke-linejoin="round"/>` +
+    `<line x1="${ax}" y1="${y0}" x2="${ax}" y2="${y0 + H}" stroke="#d97706" stroke-width="2" stroke-dasharray="5 4"/><path d="M${ax},${y0 + H - 10} h10 v10" fill="none" stroke="#d97706" stroke-width="1.5"/>` +
+    LBL(x0 + W / 2, y0 + H + 21, b) + LBL(ax - 8, y0 + H / 2 + 6, h, 'end') + '</svg>';
+}
+function rightSVG(a, b, la, lb, lc) {
+  const k = Math.min(150 / a, 105 / b), W = Math.max(50, a * k), H = Math.max(40, b * k), x0 = (240 - W) / 2 + 6, y0 = (135 - H) / 2 + 4;
+  return `<svg viewBox="0 0 240 160" class="shape"><path d="M${x0},${y0} L${x0},${y0 + H} L${x0 + W},${y0 + H} Z" fill="#dcfce7" stroke="#16a34a" stroke-width="3" stroke-linejoin="round"/>` +
+    `<path d="M${x0},${y0 + H - 12} h12 v12" fill="none" stroke="#16a34a" stroke-width="1.5"/>` +
+    LBL(x0 + W / 2, y0 + H + 21, la) + LBL(x0 - 8, y0 + H / 2 + 6, lb, 'end') + LBL(x0 + W / 2 + 8, y0 + H / 2 - 4, lc, 'start') + '</svg>';
+}
+function genGeo(g) {
+  const T = [
+    () => { const w = R(3, 15), h = R(2, 12); return num(`<div class="sub">מה השטח של המלבן? (האורכים בס"מ)</div>${rectSVG(w, h, w, h)}`, w * h, `שטח מלבן = אורך × רוחב = ${w} × ${h}`); },
+    () => { const w = R(3, 15), h = R(2, 12); return num(`<div class="sub">מה ההיקף של המלבן? (האורכים בס"מ)</div>${rectSVG(w, h, w, h)}`, 2 * (w + h), `היקף = ${w} + ${h} + ${w} + ${h}`); },
+    () => { const a = R(2, 12), area = Math.random() < .5; return num(`<div class="sub">מה ${area ? 'השטח' : 'ההיקף'} של הריבוע? (האורכים בס"מ)</div>${rectSVG(a, a, a, '')}`, area ? a * a : 4 * a, area ? `${a} × ${a}` : `4 × ${a}`); },
+    () => { const w = R(3, 12), h = R(2, 10); return num(`<div class="sub">ההיקף של המלבן הוא ${2 * (w + h)} ס"מ. מה האורך החסר?</div>${rectSVG(w, h, w, '?')}`, h, `${2 * (w + h)} : 2 = ${w + h}, ועכשיו פחות ${w}`); },
+    () => { const w = R(3, 12), h = R(2, 10); return num(`<div class="sub">השטח של המלבן הוא ${w * h} סמ"ר. מה האורך החסר?</div>${rectSVG(w, h, w, '?')}`, h, `${w * h} : ${w}`); },
+  ];
+  if (g >= 5) T.push(
+    () => { let b = R(2, 14); const h = R(2, 10); if (b * h % 2) b++; return num(`<div class="sub">מה השטח של המשולש? (האורכים בס"מ)</div>${triSVG(b, h)}`, b * h / 2, `שטח משולש = בסיס × גובה : 2 = ${b} × ${h} : 2`); },
+    () => { const a = R(30, 100), b = R(20, 150 - a); return num(`<div class="qtext">במשולש יש זווית של ${a}° וזווית של ${b}°. מה הגודל של הזווית השלישית?</div>`, 180 - a - b, 'סכום הזוויות במשולש הוא 180°'); },
+    () => { const b = R(3, 14), h = R(2, 10); return num(`<div class="qtext">הבסיס של מקבילית הוא ${b} ס"מ והגובה שלה ${h} ס"מ. מה השטח שלה בסמ"ר?</div>`, b * h, 'שטח מקבילית = בסיס × גובה'); },
+  );
+  if (g >= 6) T.push(
+    () => { const a = R(2, 10), b = R(2, 8), c = R(2, 6); return num(`<div class="qtext">מה הנפח של תיבה שהמידות שלה ${a}, ${b} ו-${c} ס"מ? (בסמ"ק)</div>`, a * b * c, 'נפח תיבה = אורך × רוחב × גובה'); },
+    () => { const a = R(2, 9); return num(`<div class="qtext">מה הנפח של קובייה שאורך הצלע שלה ${a} ס"מ? (בסמ"ק)</div>`, a ** 3, `${a} × ${a} × ${a}`); },
+    () => { const r = R(1, 10), area = Math.random() < .5; return num(`<div class="qtext">מה ${area ? 'השטח' : 'ההיקף'} של מעגל שהרדיוס שלו ${r} ס"מ? (π = 3.14)</div>`, rnd(area ? 3.14 * r * r : 2 * 3.14 * r), area ? 'שטח עיגול = ' + L('π × r × r') : 'היקף מעגל = ' + L('2 × π × r')); },
+    () => { let a, b, c; do { a = R(60, 130); b = R(60, 130); c = R(50, 130); } while (a + b + c > 320); return num(`<div class="qtext">במרובע יש זוויות של ${a}°, ${b}° ו-${c}°. מה הגודל של הזווית הרביעית?</div>`, 360 - a - b - c, 'סכום הזוויות במרובע הוא 360°'); },
+  );
+  return P(T)();
+}
+function genPct(g) {
+  const T = [
+    () => { const p = P([10, 20, 25, 50, 75, 5, 30, 40, 60]), base = R(1, 20) * (100 / gcd(p, 100)); return num(`<div class="qtext">כמה זה ${p}% מ-${base}?</div>`, p * base / 100, `${p}% זה ${frac(p, 100)}: ${base} : 100 × ${p}`); },
+    () => { let base, p; do { base = P([20, 25, 40, 50, 80, 200, 300, 400, 500]); p = P([10, 20, 25, 50, 75]); } while (base * p % 100);
+      return num(`<div class="qtext">${base * p / 100} מתוך ${base} הם כמה אחוזים?</div>`, p, `${fracTxt(base * p / 100, base)} = ${frac(p, 100)}`); },
+    () => { const [n, d] = P([[1, 2], [1, 4], [3, 4], [1, 5], [2, 5], [3, 5], [4, 5], [1, 10], [3, 10], [7, 10], [1, 20], [9, 20], [1, 25], [12, 25]]); return num(ex(`${frac(n, d)} = ${SLOT}%`), n * 100 / d, 'מרחיבים למכנה 100'); },
+    () => { const price = P([40, 60, 80, 120, 160, 200, 240, 300]), p = P([10, 20, 25, 50]); return num(`<div class="qtext">אופניים עולים ${price} ש"ח, ויש עליהם הנחה של ${p}%. כמה ש"ח משלמים?</div>`, price * (100 - p) / 100, `משלמים ${100 - p}% מהמחיר`); },
+    () => { const [a, b] = P([[1, 2], [2, 3], [3, 4], [2, 5], [3, 5], [1, 3], [4, 5]]), k = R(2, 9); return num(`<div class="qtext">היחס בין כדורים כחולים לכדורים אדומים הוא ${b}:${a}. יש ${a * k} כדורים אדומים. כמה כדורים כחולים יש?</div>`, b * k, `${a * k} : ${a} = ${k}, ו-${k} × ${b}`); },
+    () => { const [a, b] = P([[1, 2], [2, 3], [3, 4], [2, 5], [3, 5], [1, 3], [4, 5]]), k = R(2, 6); return num(`<div class="sub">השלימו את הפרופורציה</div>${ex(`${frac(a, b)} = ${frac(a * k, SLOT)}`)}`, b * k, `המונה גדל פי ${k}`); },
+  ];
+  if (g >= 7) T.push(
+    () => { const p = P([10, 20, 25, 50]), old = P([40, 60, 80, 120, 200, 240, 400]); return num(`<div class="qtext">${P(['משחק', 'ספר', 'כדור'])} עלה ${old} ש"ח, והמחיר עלה ב-${p}%. מה המחיר החדש?</div>`, old * (100 + p) / 100, `${100 + p}% מ-${old}`); },
+    () => { const p = P([10, 20, 25, 50]), x = R(2, 20) * (100 / gcd(p, 100)); return num(`<div class="qtext">${p}% ממספר הם ${x * p / 100}. מה המספר?</div>`, x, `${x * p / 100} : ${p} × 100`); },
+    () => { const old = P([40, 60, 80, 120, 200, 240, 400]), p = P([10, 20, 25, 50]), neu = old * (100 - p) / 100; return num(`<div class="qtext">אחרי הנחה של ${p}% מחיר של מעיל הוא ${neu} ש"ח. כמה הוא עלה לפני ההנחה?</div>`, old, `${neu} ש"ח הם ${100 - p}% מהמחיר`); },
+  );
+  return P(T)();
+}
+
+/* ---------- grades ז׳–ט׳ ---------- */
+function genSigned() {
+  const a = nz(-15, 15), b = nz(-15, 15);
+  const T = [
+    () => num(ex(`${sn(a)} + ${pn(b)} = ${SLOT}`), a + b, (a < 0) === (b < 0) ? 'סימנים זהים: מחברים ושומרים על הסימן' : 'סימנים שונים: מחסרים, והסימן של המספר שהערך המוחלט שלו גדול יותר'),
+    () => num(ex(`${sn(a)} − ${pn(b)} = ${SLOT}`), a - b, 'חיסור זה חיבור של הנגדי: ' + L(`${sn(a)} + ${pn(-b)}`)),
+    () => { const x = nz(-9, 9), y = nz(-9, 9); return num(ex(`${sn(x)} × ${pn(y)} = ${SLOT}`), x * y, 'סימנים זהים – חיובי, סימנים שונים – שלילי'); },
+    () => { const x = nz(-9, 9), y = nz(-9, 9); return num(ex(`${sn(x * y)} : ${pn(y)} = ${SLOT}`), x, 'סימנים זהים – חיובי, סימנים שונים – שלילי'); },
+    () => { const x = nz(-20, 20); let y = nz(-20, 20); if (Math.random() < .1) y = x;
+      return choice(`<div class="sub">בחרו את הסימן המתאים</div>${ex(`${sn(x)} ${SLOT} ${sn(y)}`)}`, ['>', '<', '='], x > y ? 0 : x < y ? 1 : 2, { tip: 'על ציר המספרים: מה שמימין גדול יותר' }); },
+    () => { const x = R(-30, -1); return num(ex(`|${sn(x)}| = ${SLOT}`), -x, 'ערך מוחלט הוא המרחק מאפס'); },
+    () => { const x = nz(-9, 9), y = nz(-9, 9), z = nz(-9, 9); return num(ex(`${sn(x)} × ${pn(y)} + ${pn(z)} = ${SLOT}`), x * y + z, 'קודם כפל, אחר כך חיבור'); },
+  ];
+  return P(T)();
+}
+const sgnSlot = v => `${v < 0 ? '−' : '+'} ${SLOT}`;
+function genAlg(g) {
+  const T = [
+    () => { const x = g >= 8 ? nz(-6, 6) : R(1, 9), a = nz(-6, 9), b = nz(-12, 12);
+      return num(`<div class="sub">הציבו ${L(`x = ${sn(x)}`)}</div>${ex(`${expr([[a, 'x'], [b]])} = ${SLOT}`)}`, a * x + b, L(`${sn(a)} × ${pn(x)} ${b < 0 ? '−' : '+'} ${Math.abs(b)}`)); },
+    () => { const a = R(2, 9); let b; do b = nz(-6, 9); while (a + b === 0); return num(ex(`${expr([[a, 'x'], [b, 'x']])} = ${SLOT}x`), a + b, 'מחברים את המקדמים של x'); },
+    () => { const a = R(2, 9), b = R(1, 9), d = R(1, 9); let c; do c = nz(-9, 9); while (a + c === 0);
+      return num(ex(`${expr([[a, 'x'], [b], [c, 'x'], [d]])} = ${SLOT}x + ${b + d}`), a + c, 'מכנסים איברים דומים: x עם x ומספרים עם מספרים'); },
+    () => { let k; do k = nz(-6, 9); while (Math.abs(k) === 1); const b = nz(-9, 9);
+      return num(ex(`${sn(k)}${bin(b)} = ${expr([[k, 'x']])} ${sgnSlot(k * b)}`), Math.abs(k * b), `חוק הפילוג: ${L(`${sn(k)} × ${pn(b)} = ${sn(k * b)}`)}`); },
+  ];
+  if (g >= 8) T.push(
+    () => { const p = nz(-9, 9), s = p < 0 ? '−' : '+';
+      return Math.random() < .5 ? num(ex(`${bin(p)}<sup>2</sup> = ${X2} ${s} ${SLOT}x + ${p * p}`), 2 * Math.abs(p), 'פעמיים המכפלה: ' + L(`2 × x × ${Math.abs(p)}`))
+        : num(ex(`${bin(p)}<sup>2</sup> = ${X2} ${s} ${2 * Math.abs(p)}x + ${SLOT}`), p * p, `${pn(p)} בריבוע`); },
+    () => { const p = R(1, 12); return num(ex(`${bin(p)}${bin(-p)} = ${X2} − ${SLOT}`), p * p, 'הפרש ריבועים: ' + L('(a + b)(a − b) = a² − b²')); },
+    () => { let p, q; do { p = nz(-7, 7); q = nz(-7, 7); } while (p + q === 0);
+      return num(ex(`${bin(p)}${bin(q)} = ${X2} ${sgnSlot(p + q)}x ${p * q < 0 ? '−' : '+'} ${Math.abs(p * q)}`), Math.abs(p + q), `מקדם ה-x הוא ${L(`${sn(p)} + ${pn(q)}`)}`); },
+  );
+  if (g >= 9) T.push(
+    () => { let p, q; do { p = nz(-7, 7); q = nz(-7, 7); } while (p + q === 0);
+      return num(`<div class="sub">פרקו לגורמים</div>${ex(`${expr([[1, X2], [p + q, 'x'], [p * q]])} = ${bin(p)}(x ${sgnSlot(q)})`)}`, Math.abs(q), `מחפשים שני מספרים שהסכום שלהם ${sn(p + q)} והמכפלה ${sn(p * q)}`); },
+    () => { const k = R(2, 9), a = R(1, 5); let b; do b = nz(-9, 9); while (gcd(a, b) > 1);
+      return num(`<div class="sub">הוציאו גורם משותף</div>${ex(`${expr([[k * a, 'x'], [k * b]])} = ${k}(${expr([[a, 'x']])} ${sgnSlot(b)})`)}`, Math.abs(b), `${k * Math.abs(b)} : ${k}`); },
+  );
+  return P(T)();
+}
+function genEq(g) {
+  const s = nz(-9, 12), T = [
+    () => { const a = nz(-15, 15); return [`${expr([[1, 'x'], [a]])} = ${sn(s + a)}`, 'מעבירים אגף: ' + L(`x = ${sn(s + a)} ${a < 0 ? '+' : '−'} ${Math.abs(a)}`)]; },
+    () => { let a; do a = nz(-9, 9); while (Math.abs(a) === 1); return [`${expr([[a, 'x']])} = ${sn(a * s)}`, `מחלקים את שני האגפים ב-${L(sn(a))}`]; },
+    () => { let a; do a = nz(-9, 9); while (Math.abs(a) === 1); const b = nz(-20, 20); return [`${expr([[a, 'x'], [b]])} = ${sn(a * s + b)}`, `קודם מעבירים את ה-${L(sn(b))} לאגף השני, ואז מחלקים ב-${L(sn(a))}`]; },
+  ];
+  let sol = s;
+  if (g >= 8) T.push(
+    () => { let a, c; do { a = nz(-9, 9); c = nz(-9, 9); } while (a === c); const b = nz(-15, 15), d = (a - c) * s + b;
+      return [`${expr([[a, 'x'], [b]])} = ${expr([[c, 'x'], [d]])}`, 'מעבירים את ה-x לאגף אחד ואת המספרים לאגף השני']; },
+    () => { let k; do k = nz(-6, 6); while (Math.abs(k) === 1); const b = nz(-9, 9); return [`${sn(k)}${bin(b)} = ${sn(k * (s + b))}`, `מחלקים ב-${L(sn(k))} או פותחים סוגריים`]; },
+    () => { const b = R(2, 6), c = nz(-6, 6), a = nz(-9, 9); sol = b * c - a; return [`${frac(expr([[1, 'x'], [a]]), b)} = ${sn(c)}`, `כופלים את שני האגפים ב-${b}`]; },
+  );
+  if (g >= 8 && Math.random() < .2) { // inequality
+    const a = R(2, 6), b = nz(-12, 12), op = P(['>', '<', '≥', '≤']);
+    return num(`<div class="sub">פתרו את אי-השוויון</div>${ex(`${expr([[a, 'x'], [b]])} ${op} ${sn(a * s + b)}`)}${ex(`x ${op} ${SLOT}`)}`, s, 'פותרים כמו משוואה (המקדם של x חיובי, אז הסימן לא מתהפך)');
+  }
+  const [eq, tip] = P(T)();
+  return num(`<div class="sub">פתרו את המשוואה</div>${ex(eq)}${ex(`x = ${SLOT}`)}`, sol, tip);
+}
+function genSys() {
+  const x = nz(-6, 9), y = nz(-6, 9); let a, b, c, d;
+  if (Math.random() < .4) [a, b, c, d] = [1, 1, 1, -1];
+  else do { a = nz(-4, 4); b = nz(-4, 4); c = nz(-4, 4); d = nz(-4, 4); } while (a * d - b * c === 0);
+  const eq = (p, q) => ex(`${expr([[p, 'x'], [q, 'y']])} = ${sn(p * x + q * y)}`), ask = P(['x', 'y']);
+  return num(`<div class="sub">פתרו את מערכת המשוואות</div><div class="lines">${eq(a, b)}${eq(c, d)}</div>${ex(`${ask} = ${SLOT}`)}`, ask === 'x' ? x : y, 'שיטת ההצבה או חיבור/חיסור משוואות כדי להיפטר מנעלם אחד');
+}
+function genQuad() {
+  let p, q; do { p = nz(-8, 8); q = nz(-8, 8); } while (p === q);
+  const eqn = ex(`${expr([[1, X2], [-(p + q), 'x'], [p * q]])} = 0`), tip = 'מפרקים לגורמים: ' + L(`${bin(-p)}${bin(-q)} = 0`);
+  const sol = (u, v) => L(`x = ${sn(Math.min(u, v))}, ${sn(Math.max(u, v))}`);
+  const T = [
+    () => num(`<div class="sub">מה הפתרון הגדול של המשוואה?</div>${eqn}`, Math.max(p, q), tip),
+    () => num(`<div class="sub">מה הפתרון הקטן של המשוואה?</div>${eqn}`, Math.min(p, q), tip),
+    () => choiceOf(`<div class="sub">מה הפתרונות של המשוואה?</div>${eqn}`, sol(p, q), [sol(-p, -q), sol(p, -q), sol(-p, q)], { txt: true, tip }),
+    () => { const r = R(1, 12); return num(`<div class="sub">מה הפתרון החיובי?</div>${ex(`${X2} = ${r * r}`)}`, r, L(`x = ±√${r * r}`)); },
+    () => { const r = nz(-9, 9); return num(`<div class="sub">מה הפתרון שאינו 0?</div>${ex(`${expr([[1, X2], [-r, 'x']])} = 0`)}`, r, 'מוציאים x: ' + L(`x${bin(-r)} = 0`)); },
+    () => { const t = R(0, 2); let b, c;
+      if (t === 2) { b = -(p + q); c = p * q; } else if (t === 1) { b = -2 * p; c = p * p; } else { b = R(-4, 4); c = Math.floor(b * b / 4) + R(1, 6); }
+      return choice(`<div class="sub">כמה פתרונות יש למשוואה?</div>${ex(`${expr([[1, X2], [b, 'x'], [c]])} = 0`)}`, ['0', '1', '2'], t, { tip: 'בודקים את הדיסקרימיננטה: ' + L('b² − 4ac') }); },
+  ];
+  return P(T)();
+}
+function genParab() {
+  const h = nz(-6, 6), k = nz(-9, 9), b = 2 * nz(-5, 5), c = nz(-9, 9), vf = ex(`y = ${bin(-h)}<sup>2</sup> ${k < 0 ? '−' : '+'} ${Math.abs(k)}`), sf = ex(`y = ${expr([[1, X2], [b, 'x'], [c]])}`);
+  const VT = 'בצורת הקדקוד ' + L('y = (x − p)² + k') + ' הקדקוד הוא ' + L('(p, k)');
+  const T = [
+    () => num(`<div class="sub">מה שיעור ה-x של הקדקוד?</div>${vf}`, h, VT),
+    () => num(`<div class="sub">מה שיעור ה-y של הקדקוד?</div>${vf}`, k, VT),
+    () => num(`<div class="sub">מה שיעור ה-x של הקדקוד?</div>${sf}`, -b / 2, L('x = −b : 2a')),
+    () => num(`<div class="sub">באיזה y הפרבולה חותכת את ציר ה-y?</div>${sf}`, c, L('x = 0') + ' מציבים'),
+    () => { const a = nz(-3, 3), bb = nz(-6, 6), x = nz(-4, 4); return num(`<div class="sub">הציבו ${L(`x = ${sn(x)}`)}</div>${ex(`y = ${expr([[a, X2], [bb, 'x'], [c]])}`)}${ex(`y = ${SLOT}`)}`, a * x * x + bb * x + c, 'קודם חזקה, אחר כך כפל, ובסוף חיבור'); },
+    () => { const a = nz(-4, 4); return choice(`<div class="sub">לפרבולה יש נקודת...</div>${ex(`y = ${expr([[a, X2], [nz(-6, 6), 'x'], [c]])}`)}`, ['מינימום', 'מקסימום'], a > 0 ? 0 : 1, { txt: true, tip: 'מקדם ' + L('x²') + ' חיובי – הפרבולה "מחייכת" ויש לה מינימום' }); },
+  ];
+  return P(T)();
+}
+function genPow(g) {
+  const T = [
+    () => { const [b, e] = P([[2, 2], [2, 3], [2, 4], [2, 5], [2, 6], [3, 2], [3, 3], [3, 4], [4, 3], [5, 3], [10, 3], [10, 4], [10, 5]]); return num(ex(`${b}<sup>${e}</sup> = ${SLOT}`), b ** e, L(Array(e).fill(b).join(' × '))); },
+    () => { const n = R(2, 15); return num(ex(`${n}<sup>2</sup> = ${SLOT}`), n * n, `${n} × ${n}`); },
+    () => { const b = R(-5, -1), e = R(2, 4); return num(ex(`(${sn(b)})<sup>${e}</sup> = ${SLOT}`), b ** e, 'מעריך זוגי – התוצאה חיובית, מעריך אי-זוגי – שלילית'); },
+    () => { const a = R(2, 9), b = R(2, 5), c = R(2, 4); return num(ex(`${a} + ${b}<sup>2</sup> × ${c} = ${SLOT}`), a + b * b * c, 'קודם חזקה, אחר כך כפל, ובסוף חיבור'); },
+    () => { const x = R(1, 6), y = R(1, 6); return num(ex(`(${x} + ${y})<sup>2</sup> = ${SLOT}`), (x + y) ** 2, 'קודם סוגריים, אחר כך חזקה'); },
+  ];
+  if (g >= 8) T.push(
+    () => { const n = R(2, 15); return num(ex(`√${n * n} = ${SLOT}`), n, `איזה מספר כפול עצמו שווה ${n * n}?`); },
+    () => { const b = P([2, 3, 5, 7, 'a']), m = R(2, 7), n = R(2, 7); return num(ex(`${b}<sup>${m}</sup> × ${b}<sup>${n}</sup> = ${b}<sup>${SLOT}</sup>`), m + n, 'בכפל חזקות עם אותו בסיס מחברים את המעריכים'); },
+    () => { const b = P([2, 3, 5, 'a']), m = R(2, 5), n = R(2, 4); return num(ex(`(${b}<sup>${m}</sup>)<sup>${n}</sup> = ${b}<sup>${SLOT}</sup>`), m * n, 'בחזקה של חזקה כופלים את המעריכים'); },
+    () => { const b = P([2, 3, 7, 'a']), n = R(2, 6), m = n + R(1, 6); return num(ex(`${b}<sup>${m}</sup> : ${b}<sup>${n}</sup> = ${b}<sup>${SLOT}</sup>`), m - n, 'בחילוק חזקות עם אותו בסיס מחסרים את המעריכים'); },
+  );
+  if (g >= 9) T.push(
+    () => { const [k, r] = P([[2, 2], [2, 3], [2, 5], [3, 2], [3, 3], [2, 6], [2, 7], [5, 2], [4, 2], [4, 3], [3, 5], [6, 2]]); return num(ex(`√${k * k * r} = ${SLOT}√${r}`), k, L(`√${k * k * r} = √${k * k} × √${r}`)); },
+    () => { const b = P([2, 3, 'a']), m = R(2, 8), n = R(1, m + 3); return num(ex(`${b}<sup>${m}</sup> × ${b}<sup>${sn(-n)}</sup> = ${b}<sup>${SLOT}</sup>`), m - n, 'מחברים את המעריכים: ' + L(`${m} + ${pn(-n)}`)); },
+    () => { const d = R(11, 99) / 10, e = R(3, 8); return num(`<div class="sub">כתיב מדעי</div>${ex(`${F(Math.round(d * 10 ** e))} = ${d} × 10<sup>${SLOT}</sup>`)}`, e, 'סופרים בכמה מקומות זזה הנקודה'); },
+    () => { const b = P([2, 3, 4, 5, 10]), e = R(1, 3); return choiceOf(ex(`${b}<sup>${sn(-e)}</sup> = ${SLOT}`), frac(1, b ** e), [L(sn(-(b ** e))), String(b ** e), frac(1, b * e), frac(e, b)], { tip: 'מעריך שלילי = 1 חלקי החזקה: ' + L(`${b}<sup>${sn(-e)}</sup> = 1 : ${b}<sup>${e}</sup>`) }); },
+  );
+  return P(T)();
+}
+function genLin() {
+  const m = nz(-5, 5), b = nz(-9, 9), line = (mm, bb) => `y = ${expr([[mm, 'x'], [bb]])}`;
+  const T = [
+    () => num(`<div class="sub">מה השיפוע של הישר?</div>${ex(line(m, b))}`, m, 'בישר ' + L('y = mx + b') + ' השיפוע הוא ' + L('m')),
+    () => num(`<div class="sub">באיזה y הישר חותך את ציר ה-y?</div>${ex(line(m, b))}`, b, L('x = 0') + ' מציבים'),
+    () => { const x = nz(-5, 6); return num(`<div class="sub">הציבו ${L(`x = ${sn(x)}`)}</div>${ex(line(m, b))}${ex(`y = ${SLOT}`)}`, m * x + b, L(`${sn(m)} × ${pn(x)} ${b < 0 ? '−' : '+'} ${Math.abs(b)}`)); },
+    () => { const x1 = R(-5, 4), dx = R(1, 4), y1 = R(-6, 6);
+      return num(`<div class="sub">מה השיפוע של הישר שעובר דרך שתי הנקודות?</div><div class="lines">${ex(`(${sn(x1)}, ${sn(y1)})`)}${ex(`(${sn(x1 + dx)}, ${sn(y1 + m * dx)})`)}</div>`, m, 'שיפוע = ההפרש בין ה-y חלקי ההפרש בין ה-x'); },
+    () => { const x0 = nz(-6, 6), mm = nz(-4, 4); return num(`<div class="sub">באיזה x הישר חותך את ציר ה-x?</div>${ex(line(mm, -mm * x0))}`, x0, L('y = 0') + ' מציבים'); },
+    () => choice(`<div class="sub">הישר עולה או יורד?</div>${ex(line(m, b))}`, ['עולה', 'יורד'], m > 0 ? 0 : 1, { txt: true, tip: 'שיפוע חיובי – עולה, שיפוע שלילי – יורד' }),
+    () => { let b2; do b2 = nz(-9, 9); while (b2 === b);
+      return choiceOf(`<div class="sub">איזה ישר מקביל לישר הזה?</div>${ex(line(m, b))}`, L(line(m, b2)), [L(line(-m, b2)), L(line(m + 1, b)), L(line(2 * m, b2))], { txt: true, tip: 'לישרים מקבילים יש אותו שיפוע' }); },
+  ];
+  return P(T)();
+}
+const TRIPLES = [[3, 4, 5], [6, 8, 10], [5, 12, 13], [8, 15, 17], [9, 12, 15], [7, 24, 25], [12, 16, 20], [20, 21, 29], [9, 40, 41], [15, 20, 25]];
+function genPyth(g) {
+  let [a, b, c] = P(TRIPLES); if (Math.random() < .5) [a, b] = [b, a];
+  const T = [
+    () => num(`<div class="sub">מה אורך היתר?</div>${rightSVG(a, b, a, b, '?')}`, c, L(`${a}² + ${b}² = ${a * a + b * b} = ${c}²`)),
+    () => num(`<div class="sub">מה אורך הניצב החסר?</div>${rightSVG(a, b, a, '?', c)}`, b, L(`${c}² − ${a}² = ${c * c - a * a} = ${b}²`)),
+    () => { const ok = Math.random() < .55, sides = ok ? [a, b, c] : [a, b, c + P([-1, 1, 2])];
+      return choice(`<div class="qtext">האם משולש שאורכי הצלעות שלו ${sides.join(', ')} הוא ישר זווית?</div>`, ['כן', 'לא'], ok ? 0 : 1, { txt: true, tip: 'בודקים אם סכום הריבועים של שתי הצלעות הקצרות שווה לריבוע של הארוכה' }); },
+    () => num(`<div class="qtext">מלבן שהאורך שלו ${a} ס"מ והרוחב שלו ${b} ס"מ. מה האורך של האלכסון?</div>`, c, 'האלכסון הוא יתר במשולש ישר זווית: ' + L(`${a}² + ${b}² = ${c}²`)),
+  ];
+  if (g >= 9) T.push(() => { const x = R(-5, 5), y = R(-5, 5), sx = P([1, -1]), sy = P([1, -1]);
+    return num(`<div class="sub">מה המרחק בין הנקודות?</div><div class="lines">${ex(`(${sn(x)}, ${sn(y)})`)}${ex(`(${sn(x + sx * a)}, ${sn(y + sy * b)})`)}</div>`, c, `הפרש ה-x הוא ${a}, הפרש ה-y הוא ${b}, ומשתמשים בפיתגורס`); });
+  return P(T)();
+}
+function genProb() {
+  const T = [
+    () => { const [txt, k] = P([['מספר זוגי', 3], ['מספר אי-זוגי', 3], ['מספר גדול מ-4', 2], ['מספר קטן מ-3', 2], ['בדיוק 6', 1], ['מספר שמתחלק ב-3', 2], ['מספר ראשוני', 3], ['מספר גדול מ-1', 5]]);
+      return choiceOf(`<div class="qtext">מטילים קובייה רגילה. מה ההסתברות לקבל ${txt}?</div>`, fracTxt(k, 6), shuffle([fracTxt(1, 6), fracTxt(1, 2), fracTxt(1, 3), fracTxt(2, 3), fracTxt(5, 6), fracTxt(k, 5)]), { tip: 'מספר התוצאות הרצויות חלקי 6' }); },
+    () => { const r = R(1, 8), bl = R(1, 8), gr = R(0, 6), t = r + bl + gr, [nm, n] = P([['אדום', r], ['כחול', bl]]);
+      const bag = gr ? `${r} כדורים אדומים, ${bl} כחולים ו-${gr} ירוקים` : `${r} כדורים אדומים ו-${bl} כחולים`;
+      return choiceOf(`<div class="qtext">בשקית יש ${bag}. מוציאים כדור אחד בלי להסתכל. מה ההסתברות שהוא ${nm}?</div>`, fracTxt(n, t), shuffle([fracTxt(n, t - n), fracTxt(1, t), fracTxt(t - n, t), fracTxt(1, 2), fracTxt(n, t + 1)]), { tip: 'מספר הכדורים הרצויים חלקי מספר כל הכדורים' }); },
+    () => { const [n, d] = P([[1, 10], [3, 10], [1, 4], [2, 5], [3, 8], [5, 12], [1, 6], [7, 20]]);
+      return choiceOf(`<div class="qtext">ההסתברות שירד מחר גשם היא ${frac(n, d)}. מה ההסתברות שלא ירד גשם?</div>`, fracTxt(d - n, d), shuffle([frac(n, d), fracTxt(1, d), fracTxt(d - n, d + 1), fracTxt(d, n + d)]), { tip: 'ההסתברות המשלימה: 1 פחות ההסתברות' }); },
+    () => { const [txt, k] = P([['פעמיים עץ', 1], ['פעם אחת עץ ופעם אחת פלי', 2], ['לפחות פעם אחת עץ', 3]]);
+      return choiceOf(`<div class="qtext">מטילים מטבע פעמיים. מה ההסתברות לקבל ${txt}?</div>`, fracTxt(k, 4), shuffle([fracTxt(1, 4), fracTxt(1, 2), fracTxt(3, 4), fracTxt(1, 3), fracTxt(2, 3)]), { tip: 'יש 4 אפשרויות: עץ-עץ, עץ-פלי, פלי-עץ, פלי-פלי' }); },
+    () => { const [n, d] = P([[1, 4], [1, 5], [2, 5], [3, 4], [1, 3], [3, 10]]), k = R(2, 6), t = d * k;
+      return num(`<div class="qtext">בקופסה יש ${t} כדורים. ההסתברות להוציא כדור צהוב היא ${frac(n, d)}. כמה כדורים צהובים יש בקופסה?</div>`, n * k, `${t} × ${frac(n, d)}`); },
+    () => { const n = P([5, 7]), xs = Array.from({ length: n }, () => R(1, 30)), sorted = [...xs].sort((a, b) => a - b);
+      return num(`<div class="qtext">מה החציון של הנתונים: <b dir="ltr">${xs.join(', ')}</b>?</div>`, sorted[(n - 1) / 2], 'מסדרים מהקטן לגדול ולוקחים את האמצעי: ' + L(sorted.join(', '))); },
+    () => { const n = R(3, 5), avg = R(5, 20); let xs, last;
+      do { xs = Array.from({ length: n - 1 }, () => R(avg - 6, avg + 6)); last = avg * n - xs.reduce((a, b) => a + b, 0); } while (last < 1 || last > avg + 10);
+      xs.push(last); shuffle(xs);
+      return num(`<div class="qtext">מה הממוצע של: <b dir="ltr">${xs.join(', ')}</b>?</div>`, avg, `הסכום ${avg * n} חלקי ${n}`); },
+  ];
+  return P(T)();
+}
+
 const TOPICS = [
-  { id: 'kefel', name: 'לוח הכפל', icon: '✖️', coins: 2, gen: genKefel },
-  { id: 'div', name: 'חילוק', icon: '➗', coins: 2, gen: genDiv },
-  { id: 'addsub', name: 'חיבור וחיסור', icon: '➕', coins: 3, gen: genAddSub },
-  { id: 'bigmul', name: 'כפל וחילוק גדולים', icon: '🧮', coins: 4, gen: genBigMul },
-  { id: 'order', name: 'סדר פעולות', icon: '🧩', coins: 4, gen: genOrder },
-  { id: 'frac', name: 'שברים', icon: '🍕', coins: 4, gen: genFrac },
-  { id: 'numbers', name: 'מספרים ועיגול', icon: '🔢', coins: 3, gen: genNumbers },
-  { id: 'word', name: 'בעיות מילוליות', icon: '📖', coins: 5, gen: genWord },
+  { id: 'kefel', name: 'לוח הכפל', icon: '✖️', coins: 2, gen: genKefel, grades: [3, 4] },
+  { id: 'kefel2', name: 'כפל ראשון', icon: '🍎', coins: 2, gen: genKefel2, grades: [2] },
+  { id: 'div', name: 'חילוק', icon: '➗', coins: 2, gen: genDiv, grades: [3, 4] },
+  { id: 'addsub', name: 'חיבור וחיסור', icon: '➕', coins: 3, gen: genAddSub, grades: [2, 3, 4] },
+  { id: 'clock', name: 'שעון וזמן', icon: '🕐', coins: 3, gen: genClock, grades: [2] },
+  { id: 'bigmul', name: 'כפל וחילוק גדולים', icon: '🧮', coins: 4, gen: genBigMul, grades: [3, 4, 5] },
+  { id: 'order', name: 'סדר פעולות', icon: '🧩', coins: 4, gen: genOrder, grades: [3, 4] },
+  { id: 'frac', name: 'שברים', icon: '🍕', coins: 4, gen: genFrac, grades: [2, 3, 4, 5, 6], names: { 2: 'חצי ורבע' } },
+  { id: 'dec', name: 'שברים עשרוניים', icon: '🔟', coins: 4, gen: genDec, grades: [5, 6], dec: [5, 6] },
+  { id: 'numbers', name: 'מספרים ועיגול', icon: '🔢', coins: 3, gen: genNumbers, grades: [2, 3, 4], names: { 2: 'מספרים עד 100' } },
+  { id: 'divis', name: 'מחלקים וראשוניים', icon: '🔍', coins: 4, gen: genDivis, grades: [5, 6] },
+  { id: 'geo', name: 'גאומטריה', icon: '📐', coins: 4, gen: genGeo, grades: [4, 5, 6], dec: [6], names: { 4: 'שטח והיקף' } },
+  { id: 'pct', name: 'אחוזים ויחס', icon: '💯', coins: 4, gen: genPct, grades: [6, 7] },
+  { id: 'signed', name: 'מספרים מכוונים', icon: '🌡️', coins: 3, gen: genSigned, grades: [7] },
+  { id: 'eq', name: 'משוואות', icon: '⚖️', coins: 4, gen: genEq, grades: [7, 8] },
+  { id: 'sys', name: 'מערכת משוואות', icon: '🔗', coins: 5, gen: genSys, grades: [9] },
+  { id: 'quad', name: 'משוואה ריבועית', icon: '🎯', coins: 5, gen: genQuad, grades: [9] },
+  { id: 'parab', name: 'פרבולות', icon: '⛰️', coins: 5, gen: genParab, grades: [9] },
+  { id: 'alg', name: 'ביטויים אלגבריים', icon: '🔤', coins: 4, gen: genAlg, grades: [7, 8, 9] },
+  { id: 'pow', name: 'חזקות ושורשים', icon: '⚡', coins: 3, gen: genPow, grades: [7, 8, 9] },
+  { id: 'lin', name: 'פונקציה קווית', icon: '📈', coins: 4, gen: genLin, grades: [8] },
+  { id: 'pyth', name: 'משפט פיתגורס', icon: '📏', coins: 4, gen: genPyth, grades: [8, 9] },
+  { id: 'prob', name: 'הסתברות וסטטיסטיקה', icon: '🃏', coins: 4, gen: genProb, grades: [8, 9] },
+  { id: 'word', name: 'בעיות מילוליות', icon: '📖', coins: 5, gen: genWord, grades: GRADES },
 ];
 const topicById = id => TOPICS.find(t => t.id === id);
+const tname = (t, g) => (t.names && t.names[g]) || t.name;
+const gradeTopics = g => TOPICS.filter(t => t.grades.includes(g));
 
 /* =========================================================
    navigation
@@ -1100,9 +1579,34 @@ function renderPick() {
     renderPick();
   });
   if (!$('#nameInput').value) $('#nameInput').value = S.name || PRESETS[pickIdx].name;
+  $('#pickGrades').hidden = S.created;
+  if (!S.created) gradePicker($('#pickGradeChips'), pickGrades);
+}
+let pickGrades = new Set();
+function gradePicker(el, sel, onChange) {
+  el.innerHTML = `<div class="gchips">${GRADES.map(g => `<button class="chip ${sel.has(g) ? 'on' : ''}" data-g="${g}">${GN[g]}</button>`).join('')}</div>`;
+  el.querySelectorAll('.chip').forEach(c => c.onclick = () => {
+    const g = +c.dataset.g; sel.has(g) ? sel.delete(g) : sel.add(g);
+    c.classList.toggle('on', sel.has(g)); SND.tap(); if (onChange) onChange();
+  });
+}
+function setGrades(sel) {
+  S.grades = [...sel].sort((a, b) => a - b);
+  if (!S.grades.includes(S.grade)) S.grade = S.grades[0];
+  S.gradesSet = true; save();
+}
+function chooseGrades(intro) {
+  const sel = new Set(S.grades);
+  modal(`<h2>🎒 באיזו כיתה?</h2>${intro ? `<p>${intro}</p>` : ''}<p class="muted">אפשר לבחור כמה כיתות, ולשנות אחר כך בהגדרות</p>
+    <div id="gPick"></div><button class="btn big primary" id="gOk">שמירה</button>`);
+  const upd = () => { $('#gOk').disabled = !sel.size; };
+  gradePicker($('#gPick'), sel, upd); upd();
+  $('#gOk').onclick = () => { if (!sel.size) return; setGrades(sel); closeModal(); SND.tap(); if ($('#sc-topics').classList.contains('active')) renderTopics(); };
 }
 $('#startBtn').onclick = () => {
   const first = !S.created;
+  if (first && !pickGrades.size) { toast('בחרו באיזו כיתה אתם 🎒'); SND.bad(); return; }
+  if (first) setGrades(pickGrades);
   S.look = { ...DEFAULT_LOOK, ...PRESETS[pickIdx].look };
   S.name = ($('#nameInput').value.trim() || PRESETS[pickIdx].name).slice(0, 14);
   S.created = true; save(); SND.fanfare();
@@ -1157,7 +1661,10 @@ const answered = () => Object.values(S.stats).reduce((a, s) => a + s.t, 0);
 const subjects = () => TOPICS.filter(t => (S.stats[t.id] || {}).t > 0).length;
 const paidWorn = () => Object.keys(S.look).filter(c => CAT[c] && item(c, S.look[c]).price > 0).length;
 const ownedCat = cat => S.owned.some(k => k.startsWith(cat + ':'));
-const B = (group, id, icon, tier, name, desc, prog) => ({ group, id, icon, tier, name, desc, prog });
+const B = (group, id, icon, tier, name, desc, prog, grades) => ({ group, id, icon, tier, name, desc, prog, grades });
+const gcount = g => S.gradeCount[g] || 0;
+const gradesWith = n => GRADES.filter(g => gcount(g) >= n).length;
+const GRADE_ICON = { 2: '🧸', 3: '🎒', 4: '🎓', 5: '📐', 6: '🔭', 7: '🧪', 8: '🧬', 9: '🚀' };
 const BADGES = [
   B('תרגילים', 'a1', '👣', 'b', 'צעד ראשון', 'פתרו את התרגיל הראשון', () => [answered(), 1]),
   B('תרגילים', 'a10', '🌱', 'b', 'מתחממים', 'פתרו 10 תרגילים', () => [answered(), 10]),
@@ -1173,11 +1680,16 @@ const BADGES = [
   B('רצפים בלי טעות', 's100', '🌟', 'g', 'מאה בלי טעות', '100 תשובות נכונות ברצף, בלי אף טעות', () => [S.bestStreak, 100]),
   B('נושאים', 'sub3', '🧭', 'b', 'סקרנים', 'תרגלו 3 נושאים שונים', () => [subjects(), 3]),
   B('נושאים', 'sub5', '🗺️', 's', 'חוקרים', 'תרגלו 5 נושאים שונים', () => [subjects(), 5]),
-  B('נושאים', 'sub8', '🌍', 'g', 'יודעי הכל', `תרגלו את כל ${TOPICS.length} הנושאים`, () => [subjects(), TOPICS.length]),
+  B('נושאים', 'sub8', '🌍', 'g', 'יודעי הכל', 'תרגלו 8 נושאים שונים', () => [subjects(), 8]),
+  B('נושאים', 'sub15', '🪐', 'g', 'מגלי עולמות', 'תרגלו 15 נושאים שונים', () => [subjects(), 15]),
   B('נושאים', 'mix25', '🎲', 'b', 'אוהבי הפתעות', 'פתרו 25 תרגילים במצב "ערבוב של הכל"', () => [S.mixCount, 25]),
-  B('נושאים', 'g4', '🎓', 's', 'כיתה ד׳ בכיס', 'פתרו 50 תרגילים ברמה של כיתה ד׳', () => [S.g4count, 50]),
-  ...TOPICS.map(t => B('מאסטרים', 'm_' + t.id, t.icon, 's', 'מאסטר ' + t.name, `30 תשובות נכונות בניסיון ראשון ב${t.name}`, () => [(S.stats[t.id] || { c: 0 }).c, 30])),
-  B('מאסטרים', 'facts', '📜', 'g', 'לוח הכפל המלא', 'ענו נכון על כל 55 התרגילים של לוח הכפל (1 עד 10)', () => [S.facts.length, 55]),
+  ...GRADES.map(g => B('כיתות', 'g' + g, GRADE_ICON[g], 's', `כיתה ${GN[g]} בכיס`, `פתרו 50 תרגילים ברמה של כיתה ${GN[g]}`, () => [gcount(g), 50], [g])),
+  B('כיתות', 'gr2', '🪜', 'b', 'קופצים כיתה', 'פתרו 10 תרגילים בכל אחת מ-2 כיתות שונות', () => [gradesWith(10), 2]),
+  B('כיתות', 'gr4', '🏔️', 's', 'מטפסי הרים', 'פתרו 10 תרגילים בכל אחת מ-4 כיתות שונות', () => [gradesWith(10), 4]),
+  B('כיתות', 'grAll', '🏫', 'g', 'מכיתה ב׳ עד ט׳', 'פתרו 10 תרגילים בכל אחת מ-8 הכיתות', () => [gradesWith(10), 8]),
+  B('כיתות', 'g500', '🦉', 'g', 'פרופסורים', 'פתרו 500 תרגילים ברמה של כיתה ז׳ ומעלה', () => [gcount(7) + gcount(8) + gcount(9), 500], [7, 8, 9]),
+  ...TOPICS.map(t => B('מאסטרים', 'm_' + t.id, t.icon, 's', 'מאסטר ' + t.name, `30 תשובות נכונות בניסיון ראשון ב${t.name}`, () => [(S.stats[t.id] || { c: 0 }).c, 30], t.grades)),
+  B('מאסטרים', 'facts', '📜', 'g', 'לוח הכפל המלא', 'ענו נכון על כל 55 התרגילים של לוח הכפל (1 עד 10)', () => [S.facts.length, 55], [2, 3, 4, 5, 6]),
   B('אתגר 60 שניות', 'sp10', '⚡', 'b', 'זריזים', 'השיגו 10 תשובות נכונות באתגר 60 שניות', () => [S.best || 0, 10]),
   B('אתגר 60 שניות', 'sp20', '🌩️', 's', 'ברק', 'השיגו 20 תשובות נכונות באתגר 60 שניות', () => [S.best || 0, 20]),
   B('אתגר 60 שניות', 'sp30', '💫', 'g', 'מהירות האור', 'השיגו 30 תשובות נכונות באתגר 60 שניות', () => [S.best || 0, 30]),
@@ -1203,6 +1715,8 @@ const BADGES = [
 ];
 const medal = (b, locked) => `<span class="medal t-${b.tier}${locked ? ' locked' : ''}">${b.icon}</span>`;
 const earnedBadges = () => BADGES.filter(b => S.badges[b.id]);
+// badges of grades that aren't played are hidden, unless already earned
+const shownBadges = () => BADGES.filter(b => S.badges[b.id] || !b.grades || b.grades.some(g => S.grades.includes(g)));
 const updateBadgeBtn = () => { $('#goBadges').textContent = `🏅 תגים (${earnedBadges().length})`; };
 let badgeQueue = [], badgeShowing = false;
 function checkBadges() {
@@ -1230,13 +1744,14 @@ function showNextBadge() {
 }
 function renderBadges() {
   const got = earnedBadges(), cnt = t => got.filter(b => b.tier === t).length;
-  $('#bsum').innerHTML = `<div class="big-emoji">🏅</div><b style="font-size:1.2rem">${got.length} מתוך ${BADGES.length} תגים</b>
+  const list = shownBadges();
+  $('#bsum').innerHTML = `<div class="big-emoji">🏅</div><b style="font-size:1.2rem">${got.length} מתוך ${list.length} תגים</b>
     <div class="tiers"><span><i class="dot t-g"></i>${cnt('g')}</span><span><i class="dot t-s"></i>${cnt('s')}</span><span><i class="dot t-b"></i>${cnt('b')}</span></div>
     <span class="muted">תג ארד = 5 🪙 · כסף = 15 🪙 · זהב = 40 🪙</span>
     <button class="btn green" id="bShare">📤 לשתף את התגים עם חברים</button>`;
   $('#bShare').onclick = () => { SND.tap(); openShare(); };
-  const groups = [...new Set(BADGES.map(b => b.group))];
-  $('#badgeList').innerHTML = groups.map(g => `<h3 class="bgroup">${g}</h3><div class="blist">` + BADGES.filter(b => b.group === g).map(b => {
+  const groups = [...new Set(list.map(b => b.group))];
+  $('#badgeList').innerHTML = groups.map(g => `<h3 class="bgroup">${g}</h3><div class="blist">` + list.filter(b => b.group === g).map(b => {
     const has = !!S.badges[b.id], [c, goal] = b.prog(), pc = Math.min(100, Math.round(100 * c / goal));
     return `<div class="bcard ${has ? 'got' : ''}">${medal(b, !has)}<div class="bt"><div class="bn">${b.name}</div><div class="bd">${b.desc}</div>` +
       (has ? `<div class="bd">✔ הושג ב-${new Date(S.badges[b.id]).toLocaleDateString('he-IL')}</div>` : goal > 1 ? `<div class="bp"><div style="width:${pc}%"></div></div><div class="bd" dir="ltr" style="text-align:right">${F(Math.min(c, goal))} / ${F(goal)}</div>` : '') +
@@ -1245,6 +1760,9 @@ function renderBadges() {
 }
 $('#goBadges').onclick = () => { SND.tap(); go('badges'); };
 
+
+/* ---------- solved per grade ---------- */
+const gradeSummary = () => GRADES.filter(g => gcount(g) > 0).map(g => [g, gcount(g)]);
 
 /* ---------- share card (image of the character + badges + coins) ---------- */
 function svgImage(svg, w, h) {
@@ -1267,42 +1785,51 @@ async function makeShareCard() {
   x.fillStyle = '#fff'; x.font = FONT(800, 62); x.fillText('כפל-כיף 🪙', W / 2, 92);
   x.fillStyle = '#fff'; rrect(x, 50, 125, W - 100, 1135, 50); x.fill();
   // character
-  const aw = 480, ah = 528, ax = (W - aw) / 2, ay = 152;
+  const aw = 440, ah = 484, ax = (W - aw) / 2, ay = 150;
   const img = await svgImage(avatarSVG(S.look), aw * 2, ah * 2);
   x.save(); rrect(x, ax, ay, aw, ah, 40); x.clip(); x.drawImage(img, ax, ay, aw, ah); x.restore();
   x.strokeStyle = '#f3e8ff'; x.lineWidth = 8; rrect(x, ax, ay, aw, ah, 40); x.stroke();
-  x.fillStyle = '#2e1065'; x.font = FONT(800, 60); x.fillText(S.name, W / 2, ay + ah + 66);
+  x.fillStyle = '#2e1065'; x.font = FONT(800, 60); x.fillText(S.name, W / 2, ay + ah + 62);
   // coins pill + badge totals
   const got = earnedBadges(), cnt = t => got.filter(b => b.tier === t).length;
-  const pillY = ay + ah + 90;
+  const pillY = ay + ah + 84;
   x.fillStyle = '#fff4c2'; rrect(x, 150, pillY, 360, 76, 38); x.fill(); x.strokeStyle = '#f5b301'; x.lineWidth = 4; x.stroke();
   x.fillStyle = '#7a4b00'; x.font = FONT(800, 40); x.fillText(`🪙 ${F(S.coins)}`, 330, pillY + 52);
   x.fillStyle = '#f3e8ff'; rrect(x, 570, pillY, 360, 76, 38); x.fill();
   x.fillStyle = '#5b21b6'; x.fillText(`🏅 ${got.length} תגים`, 750, pillY + 52);
   // medals
-  const my = pillY + 120;
+  const my = pillY + 112;
   const tiers = [['g', 'זהב'], ['s', 'כסף'], ['b', 'ארד']].map(([t, n]) => `${n} ${cnt(t)}`).join('  ·  ');
   x.fillStyle = '#6b5b95'; x.font = FONT(600, 30); x.fillText(tiers, W / 2, my);
   const show = got.slice().sort((a, b) => 'gsb'.indexOf(a.tier) - 'gsb'.indexOf(b.tier) || S.badges[b.id] - S.badges[a.id]).slice(0, 14);
   if (!show.length) { x.font = FONT(600, 34); x.fillStyle = '#9ca3af'; x.fillText('התגים הראשונים בדרך... 💪', W / 2, my + 90); }
-  const per = 7, r = 46, gap = 122;
+  const per = 7, r = 44, gap = 120;
   show.forEach((b, i) => {
     const row = Math.floor(i / per), inRow = Math.min(per, show.length - row * per), col = i % per;
-    const cx = W / 2 + ((inRow - 1) / 2 - col) * gap, cy = my + 68 + row * 110;
+    const cx = W / 2 + ((inRow - 1) / 2 - col) * gap, cy = my + 64 + row * 104;
     const [l, m, d] = TIER_COL[b.tier], rg = x.createRadialGradient(cx - 14, cy - 16, 4, cx, cy, r);
     rg.addColorStop(0, l); rg.addColorStop(.75, m); x.fillStyle = rg;
     x.beginPath(); x.arc(cx, cy, r, 0, 7); x.fill(); x.lineWidth = 7; x.strokeStyle = d; x.stroke();
     x.font = FONT(400, 44); x.textBaseline = 'middle'; x.fillStyle = '#000'; x.fillText(b.icon, cx, cy + 2); x.textBaseline = 'alphabetic';
   });
-  if (got.length > show.length) { x.font = FONT(700, 28); x.fillStyle = '#6b5b95'; x.fillText(`ועוד ${got.length - show.length} תגים`, W / 2, my + 68 + 110 + 46 + 42); }
-  x.fillStyle = '#6b5b95'; x.font = FONT(600, 32);
-  x.fillText(`פתרתי ${F(answered())} תרגילים  ·  שיא באתגר 60 שניות: ${S.best || 0}`, W / 2, 1228);
+  if (got.length > show.length) { x.font = FONT(700, 28); x.fillStyle = '#6b5b95'; x.fillText(`ועוד ${got.length - show.length} תגים`, W / 2, my + 64 + 104 + 44 + 38); }
+  // solved per grade, wrapped to the card width
+  x.font = FONT(700, 30); x.fillStyle = '#7c3aed';
+  const lines = [];
+  gradeSummary().map(([g, n]) => `כיתה ${GN[g]}: ${F(n)}`).forEach(e => {
+    const l = lines.length ? lines[lines.length - 1] + '  ·  ' + e : null;
+    if (l && x.measureText(l).width < 920) lines[lines.length - 1] = l; else lines.push(e);
+  });
+  lines.slice(0, 2).forEach((l, i, a) => x.fillText(l, W / 2, 1186 - (a.length - 1 - i) * 42));
+  x.fillStyle = '#6b5b95'; x.font = FONT(600, 30);
+  x.fillText(`פתרתי ${F(answered())} תרגילים  ·  שיא באתגר 60 שניות: ${S.best || 0}`, W / 2, 1234);
   x.fillStyle = '#fff'; x.font = FONT(800, 40); x.fillText('בואו לשחק גם! מי יאסוף יותר תגים? 🏆', W / 2, 1318);
   return new Promise(res => c.toBlob(res, 'image/png'));
 }
 function shareText() {
   const link = /^https?:/.test(location.protocol) ? '\n' + location.href.split('#')[0] : '';
-  return `תראו את ${S.name} שלי בכפל-כיף! 🪙 ${F(S.coins)} מטבעות ו-🏅 ${earnedBadges().length} תגים. מי מצליח לאסוף יותר? 💪${link}`;
+  const per = gradeSummary().map(([g, n]) => `כיתה ${GN[g]}: ${F(n)}`).join(', ');
+  return `תראו את ${S.name} שלי בכפל-כיף! 🪙 ${F(S.coins)} מטבעות ו-🏅 ${earnedBadges().length} תגים.${per ? ` פתרתי ${F(answered())} תרגילים (${per}).` : ''} מי מצליח לאסוף יותר? 💪${link}`;
 }
 function download(blob) {
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'kefel-kif.png';
@@ -1338,14 +1865,16 @@ $('#goShare').onclick = () => { SND.tap(); openShare(); };
 /* ---------- topics ---------- */
 function statLine(id) { const s = S.stats[id]; if (!s || !s.t) return ''; return `<span class="ts">${s.c} מתוך ${s.t} בניסיון ראשון</span>`; }
 function renderTopics() {
-  $$('#gradeSeg button').forEach(b => b.classList.toggle('on', +b.dataset.g === S.grade));
+  const short = S.grades.length > 3;
+  $('#gradeSeg').innerHTML = S.grades.map(g => `<button data-g="${g}" class="${g === S.grade ? 'on' : ''}">${short ? '' : 'כיתה '}${GN[g]}</button>`).join('') + '<button class="edit" data-g="edit" aria-label="בחירת כיתות">✏️</button>';
+  $$('#gradeSeg button').forEach(b => b.onclick = () => { SND.tap(); if (b.dataset.g === 'edit') return chooseGrades(); S.grade = +b.dataset.g; save(); renderTopics(); });
+  const list = gradeTopics(S.grade), cs = list.map(t => t.coins), lo = Math.min(...cs), hi = Math.max(...cs);
   $('#topicGrid').innerHTML =
-    TOPICS.map(t => `<button class="topic" data-t="${t.id}"><span class="ti">${t.icon}</span><span class="tn">${t.name}</span><span class="tc">+${t.coins} 🪙 לתרגיל</span>${statLine(t.id)}</button>`).join('') +
-    `<button class="topic wide" data-t="mix"><span class="ti">🎲</span><span><span class="tn">ערבוב של הכל</span><br><span class="tc">2-5 🪙 לתרגיל</span></span></button>` +
+    list.map(t => `<button class="topic" data-t="${t.id}"><span class="ti">${t.icon}</span><span class="tn">${tname(t, S.grade)}</span><span class="tc">+${t.coins} 🪙 לתרגיל</span>${statLine(t.id)}</button>`).join('') +
+    `<button class="topic wide" data-t="mix"><span class="ti">🎲</span><span><span class="tn">ערבוב של הכל – כיתה ${GN[S.grade]}</span><br><span class="tc">${lo === hi ? lo : lo + '-' + hi} 🪙 לתרגיל</span></span></button>` +
     `<button class="topic wide special" data-t="speed"><span class="ti">⏱️</span><span><span class="tn">אתגר 60 שניות – לוח הכפל</span><br><span class="tc">+2 🪙 לכל תשובה · שיא: ${S.best || 0}</span></span></button>`;
   $$('#topicGrid .topic').forEach(b => b.onclick = () => { SND.tap(); const t = b.dataset.t; if (t === 'kefel' || t === 'div' || t === 'speed') pickTables(t); else startQuiz(t); });
 }
-$$('#gradeSeg button').forEach(b => b.onclick = () => { S.grade = +b.dataset.g; save(); SND.tap(); renderTopics(); });
 function pickTables(t) {
   let sel = new Set(tables());
   const draw = () => {
@@ -1354,7 +1883,7 @@ function pickTables(t) {
       <div class="chips">${[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => `<button class="chip ${sel.has(n) ? 'on' : ''}" data-n="${n}">${n}</button>`).join('')}</div>
       <div class="row"><button class="btn" id="tAll">${sel.size === 10 ? 'נקה הכל' : 'בחר הכל'}</button></div>
       <button class="btn big primary" id="tGo" ${sel.size ? '' : 'disabled'}>בואו נתחיל! 🚀</button>`);
-    $$('.chip').forEach(c => c.onclick = () => { const n = +c.dataset.n; sel.has(n) ? sel.delete(n) : sel.add(n); SND.tap(); draw(); });
+    $$('#mcard .chip').forEach(c => c.onclick = () => { const n = +c.dataset.n; sel.has(n) ? sel.delete(n) : sel.add(n); SND.tap(); draw(); });
     $('#tAll').onclick = () => { sel = sel.size === 10 ? new Set() : new Set([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]); draw(); };
     $('#tGo').onclick = () => { S.tables = [...sel].sort((a, b) => a - b); save(); closeModal(); startQuiz(t); };
   };
@@ -1365,8 +1894,8 @@ function pickTables(t) {
 let Q = null;
 function startQuiz(topic) {
   if (Q && Q.timer) clearInterval(Q.timer);
-  Q = { topic, speed: topic === 'speed', correct: 0, total: 0, earned: 0, streak: 0, input: '', tries: 0, locked: false, cur: null, lastHtml: '', timer: null, end: 0 };
-  $('#qTitle').textContent = topic === 'mix' ? '🎲 ערבוב' : topic === 'speed' ? '⏱️ אתגר' : topicById(topic).icon + ' ' + topicById(topic).name;
+  Q = { topic, grade: S.grade, speed: topic === 'speed', correct: 0, total: 0, earned: 0, streak: 0, input: '', tries: 0, locked: false, cur: null, lastHtml: '', timer: null, end: 0 };
+  $('#qTitle').textContent = topic === 'mix' ? `🎲 ערבוב · ${GN[S.grade]}` : topic === 'speed' ? '⏱️ אתגר' : topicById(topic).icon + ' ' + tname(topicById(topic), S.grade);
   $('#timer').hidden = !Q.speed;
   show('quiz');
   if (Q.speed) {
@@ -1381,18 +1910,22 @@ function startQuiz(topic) {
   nextQ();
 }
 function nextQ() {
-  const tid = Q.speed ? 'kefel' : Q.topic === 'mix' ? P(TOPICS).id : Q.topic;
+  const tid = Q.speed ? 'kefel' : Q.topic === 'mix' ? P(gradeTopics(Q.grade)).id : Q.topic, t = topicById(tid);
   let q, n = 0;
-  do { q = topicById(tid).gen(S.grade); n++; } while (q.html === Q.lastHtml && n < 10);
+  do { q = t.gen(Q.grade); n++; } while (q.html === Q.lastHtml && n < 10);
   q.tid = tid; Q.lastHtml = q.html; Q.cur = q; Q.input = ''; Q.tries = 0; Q.locked = false;
   const card = $('#qcard'); card.className = 'qcard';
-  card.innerHTML = (Q.topic === 'mix' ? `<div class="qlabel">${topicById(tid).icon} ${topicById(tid).name}</div>` : '') + q.html +
+  card.innerHTML = (Q.topic === 'mix' ? `<div class="qlabel">${t.icon} ${tname(t, Q.grade)}</div>` : '') + q.html +
     (q.kind === 'num' && !q.html.includes('class="slot"') ? `<div class="ansbox">${SLOT}</div>` : '');
   const exEl = card.querySelector('.ex');
   if (exEl) { const len = exEl.textContent.length; if (len > 19) exEl.classList.add('xlong'); else if (len > 14) exEl.classList.add('long'); }
   $('#feedback').className = 'feedback'; $('#feedback').innerHTML = '';
   if (q.kind === 'num') {
-    $('#answerArea').innerHTML = `<div class="keypad">${[1, 2, 3, 4, 5, 6, 7, 8, 9].map(d => `<button class="key" data-k="${d}">${d}</button>`).join('')}<button class="key del" data-k="del">⌫</button><button class="key" data-k="0">0</button><button class="key ok" data-k="ok">✓</button></div>`;
+    // a minus key from grade ז׳ (negative numbers), a point key in topics with decimals
+    Q.keys = Q.speed ? '' : (Q.grade >= 7 ? '−' : '') + ((t.dec || []).includes(Q.grade) ? '.' : '');
+    const k = (c, cls = '') => `<button class="key ${cls}" data-k="${c}">${c === 'del' ? '⌫' : c === 'ok' ? '✓' : c}</button>`;
+    $('#answerArea').innerHTML = `<div class="kp"><div class="keypad">${[1, 2, 3, 4, 5, 6, 7, 8, 9].map(d => k(d)).join('')}</div>` +
+      `<div class="keyrow">${k('del', 'del')}${Q.keys.includes('−') ? k('−', 'sym') : ''}${k(0)}${Q.keys.includes('.') ? k('.', 'sym') : ''}${k('ok', 'ok')}</div></div>`;
     $$('#answerArea .key').forEach(k => k.onclick = () => keyPress(k.dataset.k));
   } else {
     $('#answerArea').innerHTML = `<div class="choices ${q.choices.length === 3 ? 'three' : ''}">${q.choices.map((c, i) => `<button class="choice ${q.txt ? 'txt' : ''}" data-i="${i}">${c}</button>`).join('')}</div>`;
@@ -1410,13 +1943,17 @@ function keyPress(k) {
   if (!Q || Q.locked) { if (Q && Q.waiting && k === 'ok') { Q.waiting = false; nextQ(); } return; }
   if (k === 'del') { Q.input = Q.input.slice(0, -1); SND.tap(); }
   else if (k === 'ok') return check();
-  else if (Q.input.length < 6) { Q.input = (Q.input === '0' ? '' : Q.input) + k; SND.tap(); }
+  else if (k === '−') { if (!Q.keys.includes('−')) return; Q.input = Q.input[0] === '−' ? Q.input.slice(1) : '−' + Q.input; SND.tap(); }
+  else if (k === '.') { if (!Q.keys.includes('.') || Q.input.includes('.') || Q.input.length > 7) return; Q.input += /\d$/.test(Q.input) ? '.' : '0.'; SND.tap(); }
+  else if (Q.input.replace(/[−.]/g, '').length < 7) { Q.input = Q.input.replace(/^(−?)0$/, '$1') + k; SND.tap(); }
   drawSlot();
 }
 function check() {
-  if (Q.input === '') { const s = slotEl(); s.classList.remove('bad'); void s.offsetWidth; s.classList.add('bad'); return; }
-  if (parseInt(Q.input, 10) === Q.cur.ans) onRight(); else onWrong();
+  const v = Number(Q.input.replace('−', '-'));
+  if (!/\d/.test(Q.input) || isNaN(v)) { const s = slotEl(); s.classList.remove('bad'); void s.offsetWidth; s.classList.add('bad'); return; }
+  if (Math.abs(v - Q.cur.ans) < 1e-9) onRight(); else onWrong();
 }
+const ansStr = n => F(rnd(n)).replace('-', '−');
 function pickChoice(i, btn) {
   if (Q.locked) return;
   if (i === Q.cur.correct) { btn.classList.add('good'); onRight(); return; }
@@ -1432,7 +1969,7 @@ function record(tid, firstTry, correct) {
   if (firstTry) { S.streak++; S.bestStreak = Math.max(S.bestStreak, S.streak); }
   if (correct && !firstTry) S.retryWins++;
   if (correct && Q.cur.fact && !S.facts.includes(Q.cur.fact)) S.facts.push(Q.cur.fact);
-  if (S.grade === 4) S.g4count++;
+  S.gradeCount[Q.grade] = (S.gradeCount[Q.grade] || 0) + 1;
   if (Q.topic === 'mix') S.mixCount++;
   const h = new Date().getHours();
   if (h < 8 && h >= 4) S.early = true;
@@ -1463,7 +2000,7 @@ function onWrong(maxTries = 2) {
   $('#qcard').classList.remove('badc'); void $('#qcard').offsetWidth; $('#qcard').classList.add('badc');
   if (Q.speed) {
     Q.locked = true; record(q.tid, false, false); Q.streak = 0;
-    if (s) { s.textContent = q.ans; s.classList.add('reveal'); }
+    if (s) { s.textContent = ansStr(q.ans); s.classList.add('reveal'); }
     fb.className = 'feedback bad'; fb.textContent = 'אופס!';
     updateHead();
     const cur = Q.cur;
@@ -1479,7 +2016,7 @@ function onWrong(maxTries = 2) {
   // reveal
   Q.locked = true; Q.waiting = true; Q.streak = 0; record(q.tid, false, false);
   let ansTxt;
-  if (q.kind === 'num') { if (s) { s.textContent = q.ans; s.classList.remove('bad'); s.classList.add('reveal'); } ansTxt = F(q.ans); }
+  if (q.kind === 'num') { if (s) { s.textContent = ansStr(q.ans); s.classList.remove('bad'); s.classList.add('reveal'); } ansTxt = ansStr(q.ans); }
   else { const b = $$('#answerArea .choice')[q.correct]; b.classList.add('reveal'); ansTxt = q.choices[q.correct]; }
   fb.className = 'feedback bad';
   fb.innerHTML = `התשובה הנכונה: <span dir="ltr">${ansTxt}</span>` + (q.tip ? `<span class="tip">💡 ${q.tip}</span>` : '');
@@ -1506,13 +2043,15 @@ $('#quitQuiz').onclick = () => {
   SND.tap();
   if (Q && Q.timer) { clearInterval(Q.timer); Q.timer = null; }
   if (Q) Q.ended = true;
-  const msg = Q && Q.total ? `פתרת ${Q.total} תרגילים והרווחת ${Q.earned} מטבעות! 🌟` : '';
+  const msg = Q && Q.total ? `פתרת ${Q.total} תרגילים של כיתה ${GN[Q.grade]} והרווחת ${Q.earned} מטבעות! 🌟` : '';
   go('topics');
   if (msg) toast(msg, 2800);
 };
 document.addEventListener('keydown', e => {
   if (!$('#sc-quiz').classList.contains('active') || !Q || !$('#modal').classList.contains('hidden')) return;
   if (/^[0-9]$/.test(e.key)) keyPress(e.key);
+  else if (e.key === '-' || e.key === '−') keyPress('−');
+  else if (e.key === '.' || e.key === ',') keyPress('.');
   else if (e.key === 'Backspace') keyPress('del');
   else if (e.key === 'Enter') { if (Q.waiting) { Q.waiting = false; nextQ(); } else if (Q.cur.kind === 'num') keyPress('ok'); }
 });
@@ -1571,13 +2110,16 @@ $('#shopBack').onclick = () => { SND.tap(); preview = null; go('home'); };
 
 /* ---------- stats & settings ---------- */
 function showStats() {
-  const rows = TOPICS.map(t => { const s = S.stats[t.id] || { c: 0, t: 0 }, pc = s.t ? Math.round(100 * s.c / s.t) : 0;
+  const rows = TOPICS.filter(t => t.grades.some(g => S.grades.includes(g)) || (S.stats[t.id] || {}).t).map(t => { const s = S.stats[t.id] || { c: 0, t: 0 }, pc = s.t ? Math.round(100 * s.c / s.t) : 0;
     return `<div class="stat"><span class="nm">${t.icon} ${t.name}</span><span class="bar"><div style="width:${pc}%"></div></span><span class="vl">${s.t ? pc + '% · ' + s.t : '—'}</span></div>`; }).join('');
-  const total = Object.values(S.stats).reduce((a, s) => a + s.t, 0);
+  const total = answered(), gs = GRADES.filter(g => S.grades.includes(g) || gcount(g)), gmax = Math.max(1, ...gs.map(gcount));
+  const grows = gs.map(g => `<div class="stat"><span class="nm">${GRADE_ICON[g]} כיתה ${GN[g]}</span><span class="bar"><div style="width:${Math.round(100 * gcount(g) / gmax)}%"></div></span><span class="vl">${gcount(g) ? F(gcount(g)) : '—'}</span></div>`).join('');
   const bought = S.owned.length, all = Object.values(CAT).reduce((a, c) => a + c.items.filter(i => i.price > 0).length, 0);
   modal(`<h2>📊 ההתקדמות שלי</h2>
     <p>פתרת <b>${total}</b> תרגילים · הרווחת <b>${F(S.earnedTotal || 0)}</b> 🪙</p>
     <p>שיא באתגר 60 שניות: <b>${S.best || 0}</b> · פריטים שנקנו: <b>${bought}/${all}</b></p>
+    <p class="muted">כמה תרגילים פתרת בכל כיתה:</p>
+    ${grows}
     <p class="muted">אחוז ההצלחה בניסיון הראשון בכל נושא:</p>
     ${rows}
     <button class="btn primary" onclick="closeModal()">סגירה</button>`);
@@ -1585,17 +2127,20 @@ function showStats() {
 function showSettings() {
   modal(`<h2>⚙️ הגדרות</h2>
     <label class="field">שם הדמות<input id="setName" maxlength="14" value="${esc(S.name)}"></label>
+    <div class="gpick">🎒 הכיתות במשחק<div id="setGrades"></div></div>
     <div class="toggle"><span>🔊 צלילים</span><button class="btn" id="sndBtn">${S.sound ? 'פועלים' : 'כבויים'}</button></div>
     <button class="btn" id="rePick">🔄 החלפת דמות (הפריטים שקניתם נשמרים)</button>
     <button class="btn" id="resetAll" style="color:var(--bad)">🗑️ איפוס כל המשחק</button>
     <p class="muted">ההתקדמות נשמרת בדפדפן במכשיר הזה.</p>
     <button class="btn primary" id="setDone">שמירה</button>`);
+  const sel = new Set(S.grades);
+  gradePicker($('#setGrades'), sel, () => { $('#setDone').disabled = !sel.size; });
   $('#sndBtn').onclick = () => { S.sound = !S.sound; save(); $('#sndBtn').textContent = S.sound ? 'פועלים' : 'כבויים'; SND.tap(); };
   $('#rePick').onclick = () => { closeModal(); $('#nameInput').value = S.name; renderPick(); show('pick'); };
   $('#resetAll').onclick = () => {
-    if (confirm('בטוח? כל המטבעות, הפריטים וההתקדמות יימחקו.')) { S = freshState(); save(); closeModal(); $('#nameInput').value = ''; pickIdx = 0; renderPick(); show('pick'); }
+    if (confirm('בטוח? כל המטבעות, הפריטים וההתקדמות יימחקו.')) { S = freshState(); save(); closeModal(); $('#nameInput').value = ''; pickIdx = 0; pickGrades = new Set(); renderPick(); show('pick'); }
   };
-  $('#setDone').onclick = () => { const v = $('#setName').value.trim(); if (v) S.name = v.slice(0, 14); save(); closeModal(); renderHome(); };
+  $('#setDone').onclick = () => { if (!sel.size) return; const v = $('#setName').value.trim(); if (v) S.name = v.slice(0, 14); setGrades(sel); closeModal(); renderHome(); };
 }
 
 /* =========================================================
@@ -1607,6 +2152,7 @@ else {
   go('home');
   if (markDay()) setTimeout(() => { addCoins(10); toast('☀️ בונוס יומי! +10 מטבעות'); }, 500);
   setTimeout(checkBadges, 1200); // also awards badges earned before they existed
+  if (!S.gradesSet) chooseGrades('חדש! אפשר לתרגל עכשיו מכיתה ב׳ ועד כיתה ט׳ 🎉');
 }
 </script>
 </body>
