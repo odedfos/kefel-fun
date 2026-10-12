@@ -107,8 +107,6 @@ button{font-family:inherit;color:inherit;touch-action:manipulation;cursor:pointe
 @keyframes tw{from{opacity:.2}to{opacity:1}}
 .live .notes{animation:notes 2.6s ease-in-out infinite}
 @keyframes notes{0%{opacity:0;transform:translateY(6px)}40%{opacity:1}100%{opacity:0;transform:translateY(-12px)}}
-.qpet{position:absolute;top:6px;left:6px;width:60px;cursor:pointer}
-.qpet svg{display:block;width:100%;height:auto}
 /* badges */
 .medal{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;width:58px;height:58px;border-radius:50%;font-size:1.8rem;line-height:1;position:relative;box-shadow:inset 0 -4px 0 rgba(0,0,0,.12),0 2px 0 rgba(0,0,0,.08)}
 .medal.t-b{background:radial-gradient(circle at 35% 30%,#f3c08f,#cd7f32 70%);border:4px solid #a0522d}
@@ -859,7 +857,6 @@ function petGroup(type, x, y, k = 1) {
     `<text class="fz" opacity="0" x="7" y="-46" font-size="11" font-weight="800" fill="#6366f1" font-family="Arial,sans-serif">Zz</text>` +
     `<g class="fs" opacity="0">${sparkle(-16, -40, 4.5, '#facc15')}${sparkle(16, -46, 4.5, '#facc15')}${sparkle(0, -60, 3.5, '#fff')}</g></g></g></g>`;
 }
-const petSVG = type => `<svg viewBox="-28 -68 56 86" xmlns="http://www.w3.org/2000/svg">${petGroup(type, 0, 0)}</svg>`;
 const PET_ACTS = ['jump', 'love', 'spin', 'sleep', 'wiggle'];
 function petAct(el, act) {
   if (!el || !el.querySelector('.pet')) return;
@@ -1389,8 +1386,7 @@ function nextQ() {
   do { q = topicById(tid).gen(S.grade); n++; } while (q.html === Q.lastHtml && n < 10);
   q.tid = tid; Q.lastHtml = q.html; Q.cur = q; Q.input = ''; Q.tries = 0; Q.locked = false;
   const card = $('#qcard'); card.className = 'qcard';
-  card.innerHTML = (S.look.pet !== 'none' ? `<div class="qpet live" id="qpet">${petSVG(S.look.pet)}</div>` : '') +
-    (Q.topic === 'mix' ? `<div class="qlabel">${topicById(tid).icon} ${topicById(tid).name}</div>` : '') + q.html +
+  card.innerHTML = (Q.topic === 'mix' ? `<div class="qlabel">${topicById(tid).icon} ${topicById(tid).name}</div>` : '') + q.html +
     (q.kind === 'num' && !q.html.includes('class="slot"') ? `<div class="ansbox">${SLOT}</div>` : '');
   const exEl = card.querySelector('.ex');
   if (exEl) { const len = exEl.textContent.length; if (len > 19) exEl.classList.add('xlong'); else if (len > 14) exEl.classList.add('long'); }
@@ -1452,18 +1448,17 @@ function onRight() {
   $('#qcard').classList.add('good');
   SND.ok();
   addCoins(gain, s || $('#qcard'));
-  petAct($('#qpet'), first ? P(['jump', 'love', 'love']) : 'jump');
   Q.earned += gain;
   const fb = $('#feedback'); fb.className = 'feedback good'; fb.textContent = P(PRAISE) + (first ? '' : ' (בניסיון השני)');
   if (Q.streak > 0 && Q.streak % 5 === 0 && !Q.speed) {
-    setTimeout(() => { addCoins(5, $('.qhead')); Q.earned += 5; toast(`🔥 רצף של ${Q.streak}! בונוס +5 מטבעות`); confetti(30); petAct($('#qpet'), 'spin'); }, 350);
+    setTimeout(() => { addCoins(5, $('.qhead')); Q.earned += 5; toast(`🔥 רצף של ${Q.streak}! בונוס +5 מטבעות`); confetti(30); }, 350);
   }
   updateHead(); save();
   const cur = Q.cur;
   setTimeout(() => { if ($('#sc-quiz').classList.contains('active') && Q.cur === cur && !Q.ended) nextQ(); }, Q.speed ? 450 : 1050);
 }
 function onWrong(maxTries = 2) {
-  Q.tries++; S.streak = 0; SND.bad(); petAct($('#qpet'), 'wiggle');
+  Q.tries++; S.streak = 0; SND.bad();
   const fb = $('#feedback'), q = Q.cur, s = slotEl();
   $('#qcard').classList.remove('badc'); void $('#qcard').offsetWidth; $('#qcard').classList.add('badc');
   if (Q.speed) {
