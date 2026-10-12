@@ -19,6 +19,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;600;800&display=swap" rel="stylesheet">
+<!-- anonymous visit counts: GoatCounter sets no cookies and stores nothing personal -->
+<script data-goatcounter="https://kefel-fun.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 <style>
 :root{
   --bg1:#fdf2ff; --bg2:#e0f2fe; --ink:#2e1065; --muted:#6b5b95; --card:#ffffff;
@@ -360,6 +362,21 @@ const $$ = s => [...document.querySelectorAll(s)];
 const R = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
 const P = a => a[Math.floor(Math.random() * a.length)];
 const F = n => Number(n).toLocaleString('en-US');
+// anonymous usage counts (no names, nothing a child types); waits for the GoatCounter script,
+// and gives up quietly if it never loads (offline, blocked)
+const trackQueue = [];
+let trackTries = 0;
+function track(name) {
+  if (trackTries > 15) return;
+  trackQueue.push(name); flushTrack();
+}
+function flushTrack() {
+  const gc = window.goatcounter;
+  if (gc && gc.count) { while (trackQueue.length) gc.count({ path: trackQueue.shift(), event: true }); return; }
+  if (flushTrack.timer) return;
+  if (++trackTries > 15) { trackQueue.length = 0; return; }
+  flushTrack.timer = setTimeout(() => { flushTrack.timer = 0; flushTrack(); }, 2000);
+}
 const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 
 function shade(hex, amt) {
@@ -1592,7 +1609,9 @@ function gradePicker(el, sel, onChange) {
   });
 }
 function setGrades(sel) {
+  const before = S.grades;
   S.grades = [...sel].sort((a, b) => a - b);
+  S.grades.filter(g => !before.includes(g)).forEach(g => track('grade-' + g));
   if (!S.grades.includes(S.grade)) S.grade = S.grades[0];
   S.gradesSet = true; save();
 }
@@ -1607,7 +1626,7 @@ function chooseGrades(intro) {
 $('#startBtn').onclick = () => {
   const first = !S.created;
   if (first && !pickGrades.size) { toast('בחרו באיזו כיתה אתם 🎒'); SND.bad(); return; }
-  if (first) setGrades(pickGrades);
+  if (first) { track('new-player'); setGrades(pickGrades); }
   S.look = { ...DEFAULT_LOOK, ...PRESETS[pickIdx].look };
   S.name = ($('#nameInput').value.trim() || PRESETS[pickIdx].name).slice(0, 14);
   S.created = true; save(); SND.fanfare();
@@ -1837,6 +1856,7 @@ function download(blob) {
   document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 5000);
 }
 async function openShare() {
+  track('share-open');
   modal(`<h2>📤 שיתוף עם חברים</h2><p class="muted">מכינים תמונה...</p>`);
   let blob;
   try { blob = await makeShareCard(); } catch (e) { blob = null; }
@@ -1850,8 +1870,9 @@ async function openShare() {
     <p class="muted" id="shNote">${canFile ? 'בחלון השיתוף בחרו בווטסאפ ובחבר או בקבוצה.' : 'התמונה תישמר במכשיר, ואז ייפתח ווטסאפ – צרפו אליו את התמונה מהגלריה.'}</p>
     <button class="btn" onclick="closeModal()">סגירה</button>`);
   $('#shareImg').src = URL.createObjectURL(blob);
-  $('#shDl').onclick = () => { download(blob); $('#shNote').textContent = 'התמונה נשמרה! 📸'; };
+  $('#shDl').onclick = () => { track('share-save'); download(blob); $('#shNote').textContent = 'התמונה נשמרה! 📸'; };
   $('#shWa').onclick = async () => {
+    track('share-whatsapp');
     if (canFile) {
       try { await navigator.share({ files: [file], text: shareText() }); return; }
       catch (e) { if (e && e.name === 'AbortError') return; }
@@ -1901,6 +1922,7 @@ function onTap(el, fn) {
 }
 function startQuiz(topic) {
   if (Q && Q.timer) clearInterval(Q.timer);
+  track(`quiz-${S.grade}-${topic}`);
   Q = { topic, grade: S.grade, speed: topic === 'speed', correct: 0, total: 0, earned: 0, streak: 0, input: '', tries: 0, locked: false, cur: null, lastHtml: '', timer: null, end: 0 };
   $('#qTitle').textContent = topic === 'mix' ? `🎲 ערבוב · ${GN[S.grade]}` : topic === 'speed' ? '⏱️ אתגר' : topicById(topic).icon + ' ' + tname(topicById(topic), S.grade);
   $('#timer').hidden = !Q.speed;
@@ -2041,7 +2063,8 @@ function onWrong(maxTries = 2) {
 }
 function endSpeed() {
   clearInterval(Q.timer); Q.timer = null; Q.ended = true; Q.locked = true;
-  const score = Q.correct, rec = score > (S.best || 0);
+  const score = Q.correct, rec = score > (S.best || 0), tens = Math.min(3, Math.floor(score / 10)) * 10;
+  track(`speed-score-${tens === 30 ? '30+' : tens + '-' + (tens + 9)}`);
   let bonus = 0;
   if (rec && score > 0) { S.best = score; bonus = 10; addCoins(10); }
   save(); SND.fanfare(); if (rec && score > 0) confetti(70);
@@ -2115,6 +2138,7 @@ function renderPv() {
 function buy() {
   const { cat, id } = preview, it = item(cat, id);
   if (S.coins < it.price) return;
+  track('buy-' + cat);
   S.coins -= it.price; S.owned.push(cat + ':' + id); S.look = withItem(S.look, cat, id); preview = null; save();
   SND.buy(); confetti(); setCoins(true);
   toast(`יש! ${it.name} עכשיו שלך 🎉`);
