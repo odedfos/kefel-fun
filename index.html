@@ -183,6 +183,7 @@ button{font-family:inherit;color:inherit;touch-action:manipulation;cursor:pointe
 .slot:empty:before{content:"?";opacity:.45}
 .slot.good{background:#dcfce7;border-color:#22c55e;border-style:solid;color:var(--good);animation:pop .35s}
 .slot.reveal{background:#ffedd5;border-color:var(--orange);border-style:solid;color:#c2410c}
+.slot .was{color:var(--bad);font-size:.6em;margin-right:.3em;vertical-align:middle}
 .slot.bad{animation:shake .4s;border-color:var(--bad);color:var(--bad)}
 .ansbox{font-size:2.4rem;font-weight:800}
 @keyframes shake{20%,60%{transform:translateX(-7px)}40%,80%{transform:translateX(7px)}}
@@ -203,7 +204,7 @@ button{font-family:inherit;color:inherit;touch-action:manipulation;cursor:pointe
 .feedback.good{color:var(--good)}
 .feedback.bad{color:var(--bad)}
 .feedback .tip{display:block;font-size:.95rem;font-weight:600;color:var(--muted);margin-top:4px}
-.kp{display:flex;flex-direction:column;gap:9px;direction:ltr}
+.kp{display:flex;flex-direction:column;gap:9px;direction:ltr;touch-action:none}
 .keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
 .keyrow{display:flex;gap:9px}.keyrow .key{flex:1;min-width:0}
 .key{border:none;border-radius:18px;background:#fff;font-size:1.8rem;font-weight:800;height:62px;box-shadow:0 4px 0 var(--line)}
@@ -211,7 +212,7 @@ button{font-family:inherit;color:inherit;touch-action:manipulation;cursor:pointe
 .key.ok{background:linear-gradient(180deg,#86efac,#22c55e);color:#053b17;box-shadow:0 4px 0 #15803d}
 .key.del{background:#ffe4e6;color:#9f1239;font-size:1.5rem}
 .key.sym{background:#e0f2fe;color:#075985}
-.choices{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.choices{display:grid;grid-template-columns:1fr 1fr;gap:10px;touch-action:none}
 .choices.three{grid-template-columns:repeat(3,1fr);direction:ltr}
 .choice{border:3px solid transparent;border-radius:20px;background:#fff;font-size:1.8rem;font-weight:800;min-height:80px;padding:8px;box-shadow:0 4px 0 var(--line)}
 .choice.txt{font-size:1.3rem}
@@ -1892,6 +1893,12 @@ function pickTables(t) {
 
 /* ---------- quiz ---------- */
 let Q = null;
+// answer buttons react when the finger goes down: with fast tapping the finger often slides a little,
+// and the browser then cancels the click, so digits and ✓ got lost
+function onTap(el, fn) {
+  el.addEventListener('pointerdown', e => { if (e.button > 0) return; e.preventDefault(); el._down = Date.now(); fn(); });
+  el.addEventListener('click', () => { if (Date.now() - (el._down || 0) > 1000) fn(); }); // Enter / Space on a focused button
+}
 function startQuiz(topic) {
   if (Q && Q.timer) clearInterval(Q.timer);
   Q = { topic, grade: S.grade, speed: topic === 'speed', correct: 0, total: 0, earned: 0, streak: 0, input: '', tries: 0, locked: false, cur: null, lastHtml: '', timer: null, end: 0 };
@@ -1926,10 +1933,10 @@ function nextQ() {
     const k = (c, cls = '') => `<button class="key ${cls}" data-k="${c}">${c === 'del' ? '⌫' : c === 'ok' ? '✓' : c}</button>`;
     $('#answerArea').innerHTML = `<div class="kp"><div class="keypad">${[1, 2, 3, 4, 5, 6, 7, 8, 9].map(d => k(d)).join('')}</div>` +
       `<div class="keyrow">${k('del', 'del')}${Q.keys.includes('−') ? k('−', 'sym') : ''}${k(0)}${Q.keys.includes('.') ? k('.', 'sym') : ''}${k('ok', 'ok')}</div></div>`;
-    $$('#answerArea .key').forEach(k => k.onclick = () => keyPress(k.dataset.k));
+    $$('#answerArea .key').forEach(k => onTap(k, () => keyPress(k.dataset.k)));
   } else {
     $('#answerArea').innerHTML = `<div class="choices ${q.choices.length === 3 ? 'three' : ''}">${q.choices.map((c, i) => `<button class="choice ${q.txt ? 'txt' : ''}" data-i="${i}">${c}</button>`).join('')}</div>`;
-    $$('#answerArea .choice').forEach(b => b.onclick = () => pickChoice(+b.dataset.i, b));
+    $$('#answerArea .choice').forEach(b => onTap(b, () => pickChoice(+b.dataset.i, b)));
   }
   updateHead(); drawSlot();
 }
@@ -1955,7 +1962,7 @@ function check() {
 }
 const ansStr = n => F(rnd(n)).replace('-', '−');
 function pickChoice(i, btn) {
-  if (Q.locked) return;
+  if (Q.locked || btn.disabled) return;
   if (i === Q.cur.correct) { btn.classList.add('good'); onRight(); return; }
   btn.classList.add('bad'); btn.disabled = true;
   const maxTries = Q.cur.choices.length <= 2 ? 1 : 2;
@@ -1994,14 +2001,22 @@ function onRight() {
   const cur = Q.cur;
   setTimeout(() => { if ($('#sc-quiz').classList.contains('active') && Q.cur === cur && !Q.ended) nextQ(); }, Q.speed ? 450 : 1050);
 }
+const typed = () => Q.input ? ` (ענית <span dir="ltr">${Q.input}</span>)` : '';
+// show the right answer in the box, next to the crossed-out answer that was typed,
+// so "9 × ? = 90" answered with 90 doesn't look like "9 × 10 = 90" was rejected
+function revealSlot(s, q) {
+  if (!s) return;
+  s.innerHTML = (Q.input ? `<del class="was">${Q.input}</del>` : '') + ansStr(q.ans);
+  s.classList.remove('bad'); s.classList.add('reveal');
+}
 function onWrong(maxTries = 2) {
   Q.tries++; S.streak = 0; SND.bad();
   const fb = $('#feedback'), q = Q.cur, s = slotEl();
   $('#qcard').classList.remove('badc'); void $('#qcard').offsetWidth; $('#qcard').classList.add('badc');
   if (Q.speed) {
     Q.locked = true; record(q.tid, false, false); Q.streak = 0;
-    if (s) { s.textContent = ansStr(q.ans); s.classList.add('reveal'); }
-    fb.className = 'feedback bad'; fb.textContent = 'אופס!';
+    revealSlot(s, q);
+    fb.className = 'feedback bad'; fb.innerHTML = 'אופס!' + typed();
     updateHead();
     const cur = Q.cur;
     setTimeout(() => { if (Q.cur === cur && !Q.ended) nextQ(); }, 900);
@@ -2016,10 +2031,10 @@ function onWrong(maxTries = 2) {
   // reveal
   Q.locked = true; Q.waiting = true; Q.streak = 0; record(q.tid, false, false);
   let ansTxt;
-  if (q.kind === 'num') { if (s) { s.textContent = ansStr(q.ans); s.classList.remove('bad'); s.classList.add('reveal'); } ansTxt = ansStr(q.ans); }
+  if (q.kind === 'num') { revealSlot(s, q); ansTxt = ansStr(q.ans); }
   else { const b = $$('#answerArea .choice')[q.correct]; b.classList.add('reveal'); ansTxt = q.choices[q.correct]; }
   fb.className = 'feedback bad';
-  fb.innerHTML = `התשובה הנכונה: <span dir="ltr">${ansTxt}</span>` + (q.tip ? `<span class="tip">💡 ${q.tip}</span>` : '');
+  fb.innerHTML = `התשובה הנכונה: <span dir="ltr">${ansTxt}</span>` + (q.kind === 'num' ? typed() : '') + (q.tip ? `<span class="tip">💡 ${q.tip}</span>` : '');
   $('#answerArea').insertAdjacentHTML('afterbegin', `<button class="btn big gold" id="contBtn" style="width:100%;margin-bottom:10px">הבנתי, ממשיכים ←</button>`);
   $('#contBtn').onclick = () => { Q.waiting = false; nextQ(); };
   updateHead(); save();
@@ -2049,6 +2064,7 @@ $('#quitQuiz').onclick = () => {
 };
 document.addEventListener('keydown', e => {
   if (!$('#sc-quiz').classList.contains('active') || !Q || !$('#modal').classList.contains('hidden')) return;
+  if (e.repeat) return; // a key held a bit too long must not type twice
   if (/^[0-9]$/.test(e.key)) keyPress(e.key);
   else if (e.key === '-' || e.key === '−') keyPress('−');
   else if (e.key === '.' || e.key === ',') keyPress('.');
