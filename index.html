@@ -494,7 +494,6 @@ const CAT = {
     I('hearts', 'לבבות', 30), I('space', 'חלל', 40), I('rainbow', 'קשת', 50)] },
 };
 const SECTIONS = [
-  { id: 'travel', name: '✈️ טיולים', cats: [] },
   { id: 'hair', name: '💇 שיער', cats: ['hairStyle', 'hairColor'] },
   { id: 'makeup', name: '💄 איפור', cats: ['lips', 'blush', 'shadow', 'lashes'] },
   { id: 'pet', name: '🐾 חיות', cats: ['pet'] },
@@ -505,6 +504,7 @@ const SECTIONS = [
   { id: 'tattoo', name: '🦋 קעקועים', cats: ['tattoo'] },
   { id: 'face', name: '😊 פנים', cats: ['skin', 'eyes', 'mouth', 'face'] },
   { id: 'bg', name: '🌈 רקע', cats: ['bg'] },
+  { id: 'travel', name: '✈️ טיולים', cats: [] },
 ];
 const item = (cat, id) => CAT[cat].items.find(i => i.id === id) || CAT[cat].items[0];
 
@@ -2296,7 +2296,13 @@ function lookNow() {
   if (preview && preview.cat === 'place') return { ...S.look, place: preview.id };
   return preview ? withItem(wearing(), preview.cat, preview.id) : wearing();
 }
-function openShop() { preview = null; renderShop(); show('shop'); }
+function openShop() { preview = null; renderShop(); show('shop'); tabInView(); }
+// keep the chosen tab in view (the travel tab is last, off screen on phones)
+function tabInView() {
+  const row = $('#tabs'), r = $('#tabs .tab.on').getBoundingClientRect(), c = row.getBoundingClientRect();
+  if (!c.width) return;
+  if (r.left < c.left) row.scrollLeft -= c.left - r.left + 8; else if (r.right > c.right) row.scrollLeft += r.right - c.right + 8;
+}
 // shown once, the first time the game is opened after travel was added
 function travelNews() {
   S.travelNews = true; save();
@@ -2313,6 +2319,7 @@ function renderShop() {
   $('#shopStage').innerHTML = avatarSVG(lookNow());
   $('#tabs').innerHTML = SECTIONS.map(s => `<button class="tab ${s.id === shopSec ? 'on' : ''}" data-s="${s.id}">${s.name}</button>`).join('');
   $$('#tabs .tab').forEach(b => b.onclick = () => { shopSec = b.dataset.s; preview = null; SND.tap(); renderShop(); });
+  tabInView();
   tripEndToast();
   if (shopSec === 'travel') { renderTravel(); renderPv(); return; }
   const sec = SECTIONS.find(s => s.id === shopSec);
