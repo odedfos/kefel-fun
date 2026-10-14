@@ -1794,7 +1794,7 @@ function chooseGrades(intro) {
 $('#startBtn').onclick = () => {
   const first = !S.created;
   if (first && !pickGrades.size) { toast('בחרו באיזו כיתה אתם 🎒'); SND.bad(); return; }
-  if (first) { track('new-player'); setGrades(pickGrades); }
+  if (first) { track('new-player'); setGrades(pickGrades); S.travelNews = true; } // new players find travel in the shop themselves
   S.look = { ...DEFAULT_LOOK, ...PRESETS[pickIdx].look };
   S.name = ($('#nameInput').value.trim() || PRESETS[pickIdx].name).slice(0, 14);
   S.created = true; save(); SND.fanfare();
