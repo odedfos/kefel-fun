@@ -74,7 +74,7 @@ button{font-family:inherit;color:inherit;touch-action:manipulation;cursor:pointe
 .live .eyes{animation:blink 4.5s infinite;transform-box:fill-box;transform-origin:center}
 @keyframes blink{0%,94%,100%{transform:scaleY(1)}97%{transform:scaleY(.1)}}
 /* pets & animated items */
-.pet .pbody,.pet .ptail,.pet .phead,.pet .peyes,.pet .pwing,.pet .fx>*,.sway,.shaker,.wave,.twinkle,.notes{transform-box:fill-box}
+.pet .pbody,.pet .ptail,.pet .phead,.pet .peyes,.pet .pwing,.pet .fx>*,.sway,.shaker,.wave,.twinkle,.notes,.wheel{transform-box:fill-box}
 .pet .pbody{transform-origin:50% 100%}
 .live .pet .ptail{animation:wag 1.1s ease-in-out infinite alternate;transform-origin:0% 100%}
 @keyframes wag{from{transform:rotate(-14deg)}to{transform:rotate(14deg)}}
@@ -106,6 +106,8 @@ button{font-family:inherit;color:inherit;touch-action:manipulation;cursor:pointe
 .live .wave{animation:wavehand 1.6s ease-in-out infinite alternate;transform-origin:50% 100%}
 @keyframes wavehand{from{transform:rotate(-5deg)}to{transform:rotate(7deg)}}
 .live .twinkle{animation:tw 1s ease-in-out infinite alternate}
+.live .wheel{animation:roll 1.4s linear infinite;transform-origin:50% 50%}
+@keyframes roll{to{transform:rotate(360deg)}}
 @keyframes tw{from{opacity:.2}to{opacity:1}}
 .live .notes{animation:notes 2.6s ease-in-out infinite}
 @keyframes notes{0%{opacity:0;transform:translateY(6px)}40%{opacity:1}100%{opacity:0;transform:translateY(-12px)}}
@@ -233,6 +235,8 @@ button{font-family:inherit;color:inherit;touch-action:manipulation;cursor:pointe
 .tabs::-webkit-scrollbar{display:none}
 .tab{flex:0 0 auto;border:none;border-radius:999px;background:#fff;padding:8px 14px;font-weight:800;font-size:1rem;box-shadow:0 2px 0 var(--line)}
 .tab.on{background:linear-gradient(180deg,#f9a8d4,var(--pink));color:#fff}
+.tab.secret{background:linear-gradient(180deg,#fde68a,#f59e0b);color:#78350f}
+.tab.secret.on{background:linear-gradient(180deg,#facc15,#b45309);color:#fff}
 .cat-h{margin:10px 2px 6px;font-size:1.05rem}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:9px}
 .tile{position:relative;border:3px solid transparent;border-radius:18px;background:#fff;padding:6px 4px 6px;display:flex;flex-direction:column;align-items:center;gap:3px;box-shadow:0 3px 0 var(--line)}
@@ -412,7 +416,7 @@ function bez(p0, p1, p2, p3, t) {
    catalog
    ========================================================= */
 const C = (id, name, color, price = 0, extra = {}) => ({ id, name, color, price, ...extra });
-const I = (id, name, price = 0) => ({ id, name, price });
+const I = (id, name, price = 0, extra = {}) => ({ id, name, price, ...extra });
 const NONE = I('none', 'בלי', 0);
 
 const CAT = {
@@ -462,7 +466,8 @@ const CAT = {
   head: { label: 'על הראש', type: 'style', zoom: 'head', items: [
     NONE, I('headband', 'קשת', 15), I('bow', 'סרט', 20), I('cap', 'כובע מצחייה', 25), I('beanie', 'כובע גרב', 25),
     I('cat', 'אוזני חתול', 30), I('party', 'כובע מסיבה', 30), I('bunny', 'אוזני ארנב', 35), I('flowers', 'זר פרחים', 35),
-    I('witch', 'כובע קוסם', 45), I('crown', 'כתר', 80), I('unicorn', 'קרן חד-קרן', 90)] },
+    I('witch', 'כובע קוסם', 45), I('crown', 'כתר', 80), I('unicorn', 'קרן חד-קרן', 90),
+    I('diamondcrown', 'כתר יהלום', 300, { secret: 1 })] },
   glasses: { label: 'משקפיים', type: 'style', zoom: 'face', items: [
     NONE, I('round', 'עגולים', 20), I('sun', 'משקפי שמש', 30), I('hearts', 'לבבות', 35), I('stars', 'כוכבים', 40)] },
   earrings: { label: 'עגילים', type: 'style', zoom: 'head', items: [
@@ -476,7 +481,8 @@ const CAT = {
     I('anchor', 'עוגן', 20), I('rose', 'ורד', 25), I('rainbow', 'קשת', 25), I('mom', 'לב אמא', 30)] },
   held: { label: 'ביד', type: 'style', zoom: 'full', items: [
     NONE, I('lollipop', 'סוכרייה', 15), I('icecream', 'גלידה', 20), I('balloon', 'בלון', 20), I('heartballoon', 'בלון לב', 25),
-    I('starballoon', 'בלון כוכב', 30), I('wand', 'שרביט קסמים', 35), I('balloons', 'צרור בלונים', 40)] },
+    I('starballoon', 'בלון כוכב', 30), I('wand', 'שרביט קסמים', 35), I('balloons', 'צרור בלונים', 40), I('yarn', 'כדור צמר', 25),
+    I('burger', 'המבורגר', 50, { secret: 1, hours: 24 })] },
   music: { label: 'כלי נגינה', type: 'style', zoom: 'full', items: [
     NONE, I('recorder', 'חלילית', 20), I('maracas', 'מרקס', 20), I('tambourine', 'טמבורין', 25), I('mic', 'מיקרופון', 30),
     I('guitar', 'יוקלילי', 40), I('violin', 'כינור', 45), I('trumpet', 'חצוצרה', 45)] },
@@ -486,6 +492,7 @@ const CAT = {
   bg: { label: 'רקע', type: 'style', zoom: 'full', items: [
     I('pastel', 'פסטל'), I('sky', 'שמיים', 15), I('sunset', 'שקיעה', 20), I('sea', 'ים', 25), I('forest', 'יער', 25),
     I('hearts', 'לבבות', 30), I('space', 'חלל', 40), I('rainbow', 'קשת', 50)] },
+  ride: { label: 'רכב', type: 'style', zoom: 'full', items: [NONE, I('racecar', 'מכונית מרוץ', 500, { secret: 1 })] },
 };
 const SECTIONS = [
   { id: 'hair', name: '💇 שיער', cats: ['hairStyle', 'hairColor'] },
@@ -498,13 +505,19 @@ const SECTIONS = [
   { id: 'tattoo', name: '🦋 קעקועים', cats: ['tattoo'] },
   { id: 'face', name: '😊 פנים', cats: ['skin', 'eyes', 'mouth', 'face'] },
   { id: 'bg', name: '🌈 רקע', cats: ['bg'] },
+  // easter eggs: a secret section shows up only once its secret is found, and holds the items marked with its number
+  { id: 'secret1', name: '🗝️ החנות הסודית', cats: ['head', 'ride', 'held'], secret: 1 },
 ];
+const secretOpen = n => S.secrets.includes(n);
+// items of a secret store stay out of sight until it opens, and out of the regular tabs for good
+const shopItems = (cat, sec) => CAT[cat].items.filter(i => sec.secret ? i.secret === sec.secret : !i.secret);
+const visibleItems = cat => CAT[cat].items.filter(i => !i.secret || secretOpen(i.secret));
 const item = (cat, id) => CAT[cat].items.find(i => i.id === id) || CAT[cat].items[0];
 
 const DEFAULT_LOOK = { skin: 's2', hairStyle: 'long', hairColor: 'brown', eyes: 'brown', mouth: 'smile', face: 'none',
   lips: 'none', blush: 'none', shadow: 'none', lashes: 'none', outfit: 'tshirt', outfitColor: 'pink', neck: 'none',
   head: 'none', glasses: 'none', earrings: 'none', bg: 'pastel',
-  bracelet: 'none', tattoo: 'none', held: 'none', music: 'none', pet: 'none' };
+  bracelet: 'none', tattoo: 'none', held: 'none', music: 'none', pet: 'none', ride: 'none' };
 // one hand can hold only one thing
 const EXCLUSIVE = { held: 'music', music: 'held' };
 function withItem(L, cat, id) { const o = { ...L, [cat]: id }; if (EXCLUSIVE[cat] && id !== 'none') o[EXCLUSIVE[cat]] = 'none'; return o; }
@@ -525,7 +538,7 @@ const freshState = () => ({ created: false, name: '', coins: 15, owned: [], look
   grades: [], gradesSet: false, gradeCount: {},
   tables: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], sound: true, stats: {}, lastDay: '', best: 0, earnedTotal: 0,
   badges: {}, streak: 0, bestStreak: 0, facts: [], retryWins: 0, mixCount: 0, petTaps: 0,
-  days: 0, dayStreak: 0, bestDayStreak: 0, early: false, night: false });
+  days: 0, dayStreak: 0, bestDayStreak: 0, early: false, night: false, secrets: [], until: {} });
 let S = load();
 function load() {
   let s = null;
@@ -543,7 +556,26 @@ function load() {
   return o;
 }
 function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
-const isOwned = (cat, id) => item(cat, id).price === 0 || S.owned.includes(cat + ':' + id);
+function isOwned(cat, id) {
+  const it = item(cat, id), k = cat + ':' + id;
+  if (it.price === 0) return true;
+  if (it.hours) return (S.until[k] || 0) > Date.now(); // used up after a while, then can be bought again
+  return S.owned.includes(k);
+}
+const hoursLeft = (cat, id) => Math.max(1, Math.ceil(((S.until[cat + ':' + id] || 0) - Date.now()) / 36e5));
+// take off and forget items whose time is up; returns true if something changed
+function expireItems() {
+  let changed = false;
+  Object.keys(S.until).forEach(k => {
+    if (S.until[k] > Date.now()) return;
+    const [cat, id] = k.split(':');
+    delete S.until[k]; changed = true;
+    if (S.look[cat] === id) S.look[cat] = 'none';
+    toast(`ה${item(cat, id).name} נגמר! 😋 אפשר לקנות חדש בחנות הסודית`, 3000);
+  });
+  if (changed) save();
+  return changed;
+}
 
 /* =========================================================
    sound + effects
@@ -790,6 +822,9 @@ function headAcc(L, hair) {
     case 'flowers': { let s = `<path d="M54,80 C50,24 150,24 146,80" stroke="#16a34a" stroke-width="3" fill="none"/>`; const cols = ['#f472b6', '#fff', '#c084fc', '#fb7185', '#fff', '#f472b6', '#c084fc']; for (let i = 0; i < 7; i++) { const [x, y] = bez([54, 80], [50, 24], [150, 24], [146, 80], 0.08 + i * 0.14); s += flower(x, y, 5.5, cols[i]); } return s; }
     case 'witch': return `<polygon points="66,46 106,-6 134,46" fill="#5b21b6"/><path d="M70,42 Q100,48 130,42 L127,34 Q100,40 73,34 Z" fill="#f59e0b"/><ellipse cx="100" cy="46" rx="62" ry="10" fill="#4c1d95"/>${star(112, 18, 5, '#fde047')}`;
     case 'crown': return `<path d="M62,52 L66,16 L84,34 L100,6 L116,34 L134,16 L138,52 Z" fill="url(#g-gold)" stroke="#b7791f" stroke-width="2" stroke-linejoin="round"/><circle cx="100" cy="42" r="5.5" fill="#e11d48"/><circle cx="80" cy="45" r="4" fill="#3b82f6"/><circle cx="120" cy="45" r="4" fill="#22c55e"/><circle cx="66" cy="16" r="3.5" fill="#fde68a"/><circle cx="100" cy="6" r="3.5" fill="#fde68a"/><circle cx="134" cy="16" r="3.5" fill="#fde68a"/>`;
+    case 'diamondcrown': return `<path d="M58,56 L60,12 L80,34 L100,2 L120,34 L140,12 L142,56 Z" fill="url(#g-gold)" stroke="#b7791f" stroke-width="2" stroke-linejoin="round"/><rect x="55" y="47" width="90" height="11" rx="4" fill="url(#g-gold)" stroke="#b7791f" stroke-width="1.5"/><circle cx="68" cy="52.5" r="3.5" fill="#e11d48"/><circle cx="132" cy="52.5" r="3.5" fill="#22c55e"/><circle cx="60" cy="12" r="3.5" fill="#fde68a"/><circle cx="100" cy="2" r="3.5" fill="#fde68a"/><circle cx="140" cy="12" r="3.5" fill="#fde68a"/>` +
+      `<polygon points="89,24 111,24 120,35 100,58 80,35" fill="#a5f3fc" stroke="#0891b2" stroke-width="1.6" stroke-linejoin="round"/><path d="M80,35 L120,35 M89,24 L94,35 L100,58 L106,35 L111,24 M94,35 L100,24 L106,35" stroke="#0891b2" stroke-width="1" fill="none"/><polygon points="91,26 97,26 93,33 85,33" fill="#fff" opacity=".75"/>` +
+      `<g class="twinkle">${sparkle(124, 22, 4.5, '#fff')}${sparkle(76, 20, 3.5, '#fff')}${sparkle(110, 48, 3, '#fff')}</g>`;
     case 'unicorn': return `<polygon points="90,48 100,-2 110,48" fill="url(#g-gold)" stroke="#d97706" stroke-width="1.5"/><path d="M92,40 L108,35 M94,29 L106,25 M96,18 L104,15" stroke="#d97706" stroke-width="2"/>${flower(80, 46, 6, '#f9a8d4')}${flower(120, 46, 6, '#c4b5fd')}`;
   }
   return '';
@@ -826,6 +861,9 @@ const HELD = {
   balloons: () => `<g class="sway">${STRING(160, 74)}${STRING(186, 82)}${STRING(175, 56)}${BAL(160, 58, 12, 15, '#60a5fa')}${BAL(186, 66, 12, 15, '#facc15')}${BAL(175, 40, 12, 15, '#f472b6')}</g>`,
   wand: () => `<path d="M163,178 L186,128" stroke="#1f2937" stroke-width="3.5" stroke-linecap="round"/><path d="M183,135 L186,128" stroke="#fff" stroke-width="3.5" stroke-linecap="round"/>${star(188, 121, 11, 'url(#g-gold)', 'stroke="#ca8a04" stroke-width="1"')}<g class="twinkle">${sparkle(176, 108, 4.5, '#fde047')}${sparkle(196, 140, 3.5, '#f9a8d4')}${sparkle(194, 104, 3, '#fff')}</g>`,
   icecream: () => `<polygon points="156,142 178,142 167,176" fill="#f4a460"/><path d="M160,148 L172,160 M164,144 L175,155 M174,148 L162,160 M170,144 L159,155" stroke="#c2773a" stroke-width="1"/><circle cx="161" cy="137" r="8.5" fill="#f9a8d4"/><circle cx="173" cy="137" r="8.5" fill="#6ee7b7"/><circle cx="167" cy="127" r="8.5" fill="#92400e"/><circle cx="167" cy="117" r="3.2" fill="#e11d48"/>`,
+  yarn: () => `<path d="M177,154 C192,168 176,188 190,206" stroke="#ec4899" stroke-width="2" fill="none" stroke-linecap="round"/><circle cx="167" cy="145" r="14" fill="#f472b6"/><g stroke="#db2777" stroke-width="1.6" fill="none" stroke-linecap="round"><path d="M155,138 Q168,146 160,158"/><path d="M158,134 Q173,142 166,159"/><path d="M165,131 Q179,140 175,155"/><path d="M154,149 Q167,140 181,147"/></g><path d="M159,137 Q163,133 168,133" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round" opacity=".5"/>`,
+  burger: () => `<path d="M152,152 L182,152 Q182,160 174,160 L160,160 Q152,160 152,152 Z" fill="#e8a54b"/><rect x="150" y="144" width="34" height="9" rx="4" fill="#7c3f1d"/><path d="M151,144 L183,144 L180,150 L175,146 L170,151 L165,146 L159,150 L155,146 Z" fill="#facc15"/><rect x="152" y="139" width="30" height="5" rx="2.5" fill="#ef4444"/><path d="M149,141 Q153,137 157,141 T165,141 T173,141 T181,141 L185,141 L185,144 L149,144 Z" fill="#4ade80"/><path d="M150,140 Q150,123 167,123 Q184,123 184,140 Z" fill="#f4a949"/>` +
+    [[159, 131], [167, 128], [175, 131], [163, 135], [171, 135]].map(([x, y]) => `<ellipse cx="${x}" cy="${y}" rx="1.5" ry=".9" fill="#fff7ed"/>`).join('') + `<path d="M156,130 Q160,126 165,125" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round" opacity=".45"/>`,
   lollipop: () => `<path d="M167,174 L167,124" stroke="#f1f5f9" stroke-width="3.5"/><circle cx="167" cy="110" r="15" fill="#f472b6"/><circle cx="167" cy="110" r="11" fill="#fde047"/><circle cx="167" cy="110" r="7" fill="#7dd3fc"/><circle cx="167" cy="110" r="3" fill="#fff"/>`,
 };
 const NOTES = `<g class="notes"><text x="146" y="128" font-size="13" fill="#7c3aed">♪</text><text x="186" y="118" font-size="11" fill="#ec4899">♫</text></g>`;
@@ -837,6 +875,17 @@ const MUSIC = {
   guitar: () => `<rect x="165" y="124" width="7" height="66" fill="#92400e"/><rect x="163" y="114" width="11" height="13" rx="2" fill="#78350f"/><circle cx="162" cy="118" r="1.6" fill="#e5e7eb"/><circle cx="175" cy="118" r="1.6" fill="#e5e7eb"/><circle cx="162" cy="124" r="1.6" fill="#e5e7eb"/><circle cx="175" cy="124" r="1.6" fill="#e5e7eb"/><ellipse cx="168.5" cy="206" rx="18" ry="15" fill="#f59e0b"/><ellipse cx="168.5" cy="188" rx="13" ry="11" fill="#f59e0b"/><circle cx="168.5" cy="196" r="5" fill="#78350f"/><rect x="162" y="208" width="13" height="3" fill="#78350f"/><path d="M167,126 L167,209 M170,126 L170,209" stroke="#fef3c7" stroke-width=".6"/>${NOTES}`,
   violin: () => `<rect x="165.5" y="124" width="6" height="56" fill="#1f2937"/><path d="M166,116 q2.5,-6 5,0 q0,6 -2.5,8 q-2.5,-2 -2.5,-8 Z" fill="#7c2d12"/><ellipse cx="168.5" cy="206" rx="15" ry="13" fill="#9a3412"/><ellipse cx="168.5" cy="189" rx="11" ry="9" fill="#9a3412"/><path d="M161,193 q-2,4 0,8 M176,193 q2,4 0,8" stroke="#1f2937" stroke-width="1.3" fill="none"/><path d="M144,140 L196,200" stroke="#7c2d12" stroke-width="2.2"/><path d="M146,143 L194,199" stroke="#f5f5f4" stroke-width=".8"/>${NOTES}`,
   trumpet: () => `<g fill="url(#g-gold)" stroke="#b7791f" stroke-width="1"><rect x="134" y="155" width="50" height="6.5" rx="3"/><path d="M182,153 L199,141 L199,176 L182,164 Z"/><rect x="157" y="146" width="4.5" height="10"/><rect x="163.5" y="146" width="4.5" height="10"/><rect x="170" y="146" width="4.5" height="10"/><rect x="128" y="156" width="8" height="4.5" rx="1.5"/></g>${NOTES}`,
+};
+/* ---------- something to ride in, drawn under the arm ---------- */
+const WHEEL = x => `<circle cx="${x}" cy="206" r="15" fill="#111827"/><g class="wheel"><circle cx="${x}" cy="206" r="7.5" fill="#d1d5db"/><path d="M${x - 7},206 L${x + 7},206 M${x},199 L${x},213" stroke="#6b7280" stroke-width="1.6"/><circle cx="${x}" cy="206" r="2.2" fill="#6b7280"/></g>`;
+const RIDE = {
+  none: () => '',
+  racecar: () => `<rect x="10" y="172" width="5" height="18" fill="#1f2937"/><rect x="0" y="166" width="30" height="8" rx="2" fill="#b91c1c"/>` +
+    `<path d="M136,185 L146,164 L153,165 L149,187 Z" fill="#bae6fd" opacity=".8" stroke="#1f2937" stroke-width="1.2"/>` +
+    `<path d="M2,216 L4,195 Q6,187 20,187 L58,185 Q100,177 142,185 L178,192 Q198,198 199,210 L199,216 Z" fill="#ef4444"/>` +
+    `<path d="M4,201 L198,205" stroke="#fff" stroke-width="4"/><path d="M24,191 Q56,185 80,186" stroke="#fff" stroke-width="2.5" fill="none" stroke-linecap="round" opacity=".45"/>` +
+    `<circle cx="101" cy="199" r="10" fill="#fff" stroke="#1f2937" stroke-width="1.5"/><text x="101" y="203.8" font-size="13" font-weight="800" text-anchor="middle" fill="#1f2937" font-family="Arial,sans-serif">1</text>` +
+    WHEEL(44) + WHEEL(160),
 };
 function armSVG(L, skin) {
   const held = L.held !== 'none' ? L.held : L.music !== 'none' ? L.music : null;
@@ -928,6 +977,7 @@ function avatarSVG(L, view = 'full') {
     EARRINGS[L.earrings]() +
     GLASSES[L.glasses]() +
     headAcc(L, hair) +
+    (RIDE[L.ride] || RIDE.none)() +
     armSVG(L, skin) +
     petGroup(L.pet, 40, 172, 1.35) +
     `</svg>`;
@@ -1647,7 +1697,8 @@ function markDay() { // returns true on the first visit of a new day
 }
 function bubbleText() {
   const want = [];
-  ['pet', 'head', 'held', 'music', 'outfit', 'hairColor', 'bracelet', 'glasses', 'bg', 'hairStyle', 'neck', 'tattoo'].forEach(c => CAT[c].items.forEach(i => { if (!isOwned(c, i.id)) want.push(i); }));
+  if (S.look.pet === 'cat' && !secretOpen(1) && Math.random() < .25) return 'פססט... החתולים הכי אוהבים כדורי צמר 🧶 וגם שמלטפים אותם הרבה הרבה פעמים!';
+  ['pet', 'head', 'held', 'music', 'outfit', 'hairColor', 'bracelet', 'glasses', 'bg', 'hairStyle', 'neck', 'tattoo', 'ride'].forEach(c => visibleItems(c).forEach(i => { if (!isOwned(c, i.id)) want.push(i); }));
   if (!want.length) return 'יש לי כבר הכל! איזה כיף 😍 בואו נמשיך לתרגל ולשבור שיאים!';
   const afford = want.filter(i => i.price <= S.coins);
   if (afford.length && Math.random() < .6) { const i = P(afford); return `יש מספיק מטבעות בשביל ${i.name}! 🛍️ בואו לחנות!`; }
@@ -1656,6 +1707,7 @@ function bubbleText() {
   return 'בואו נפתור תרגילים ונרוויח מטבעות! 💪';
 }
 function renderHome() {
+  expireItems();
   updateBadgeBtn();
   $('#homeStage').innerHTML = avatarSVG(S.look) + `<div class="nametag">${esc(S.name)}</div>`;
   $('#bubble').textContent = bubbleText();
@@ -1665,10 +1717,40 @@ $('#goPractice').onclick = () => { SND.tap(); go('topics'); };
 $('#goShop').onclick = () => { SND.tap(); openShop(); };
 $('#goStats').onclick = () => { SND.tap(); showStats(); };
 $('#goSettings').onclick = () => { SND.tap(); showSettings(); };
-$('#homeStage').onclick = () => {
-  if (S.look.pet !== 'none') { petAct($('#homeStage'), P(['love', 'jump', 'spin'])); $('#bubble').textContent = PET_SAY[S.look.pet]; SND.coin(); S.petTaps++; save(); checkBadges(); }
+$('#homeStage').onclick = e => {
+  if (S.look.pet !== 'none') {
+    petAct($('#homeStage'), P(['love', 'jump', 'spin'])); $('#bubble').textContent = PET_SAY[S.look.pet]; SND.coin(); S.petTaps++; save();
+    secretCatTap(!!e.target.closest('.pet'));
+    checkBadges();
+  }
   else { $('#bubble').textContent = bubbleText(); SND.tap(); }
 };
+/* ---------- easter egg #1: a cat on the shoulder, a ball of yarn in the hand, and 10 pats in a row on the cat ---------- */
+const CAT_PATS = 10;
+let catPats = 0, catPatAt = 0;
+function secretCatTap(onCat) {
+  if (secretOpen(1) || S.look.pet !== 'cat' || S.look.held !== 'yarn') return;
+  const now = Date.now();
+  if (!onCat || now - catPatAt > 3000) catPats = 0; // a tap next to the cat, or a long pause, starts over
+  catPatAt = now;
+  if (!onCat) return;
+  catPats++;
+  $('#bubble').textContent = (catPats < CAT_PATS / 2 ? 'מיאו! 😺 ' : 'גרררר... 😻 ') + '🐾'.repeat(catPats);
+  if (catPats < CAT_PATS) return;
+  catPats = 0;
+  S.secrets.push(1); save(); track('secret-1');
+  SND.fanfare(); confetti(90);
+  modal(`<div class="big-emoji">🗝️</div><h2>גיליתם סוד!</h2><p>החתול כל כך שמח עם כדור הצמר, שהוא גילה לכם את <b>החנות הסודית</b> ✨</p>
+    <p class="muted">רק מי שמגלה את הסוד יכול לקנות בה</p>
+    <button class="btn big gold" id="toSecret">🗝️ לחנות הסודית!</button>`);
+  $('#toSecret').onclick = () => { closeModal(); shopSec = 'secret1'; openShop(); $('#tabs .tab.on').scrollIntoView({ block: 'nearest', inline: 'center' }); };
+}
+// the hamburger runs out even while the game stays open
+setInterval(() => {
+  if (!expireItems()) return;
+  if ($('#sc-home').classList.contains('active')) renderHome();
+  if ($('#sc-shop').classList.contains('active')) { preview = null; renderShop(); }
+}, 60000);
 // the pet does something cute every few seconds
 setInterval(() => {
   ['#homeStage', '#shopStage'].forEach(id => { const el = $(id); if (el && el.offsetParent && Math.random() < .7) petAct(el); });
@@ -1732,11 +1814,13 @@ const BADGES = [
   B('מטבעות וחנות', 'pet', '🐾', 'b', 'חבר על הכתף', 'אמצו חיית מחמד', () => [ownedCat('pet') ? 1 : 0, 1]),
   B('מטבעות וחנות', 'band', '🎸', 'b', 'להקה', 'קנו כלי נגינה', () => [ownedCat('music') ? 1 : 0, 1]),
   B('מטבעות וחנות', 'petTaps', '🤗', 'b', 'חברים הכי טובים', 'לחצו על חיית המחמד 25 פעמים כדי לשחק איתה', () => [S.petTaps, 25]),
+  // secret badges stay hidden until earned
+  { ...B('סודות', 'secret1', '🗝️', 'g', 'החנות הסודית #1', 'ליטפתם 10 פעמים ברצף את החתול על הכתף, עם כדור צמר ביד', () => [secretOpen(1) ? 1 : 0, 1]), secret: true },
 ];
 const medal = (b, locked) => `<span class="medal t-${b.tier}${locked ? ' locked' : ''}">${b.icon}</span>`;
 const earnedBadges = () => BADGES.filter(b => S.badges[b.id]);
 // badges of grades that aren't played are hidden, unless already earned
-const shownBadges = () => BADGES.filter(b => S.badges[b.id] || !b.grades || b.grades.some(g => S.grades.includes(g)));
+const shownBadges = () => BADGES.filter(b => S.badges[b.id] || (!b.secret && (!b.grades || b.grades.some(g => S.grades.includes(g)))));
 const updateBadgeBtn = () => { $('#goBadges').textContent = `🏅 תגים (${earnedBadges().length})`; };
 let badgeQueue = [], badgeShowing = false;
 function checkBadges() {
@@ -2100,18 +2184,22 @@ let shopSec = 'hair', preview = null;
 function lookNow() { return preview ? withItem(S.look, preview.cat, preview.id) : S.look; }
 function openShop() { preview = null; renderShop(); show('shop'); }
 function renderShop() {
+  expireItems();
+  const secs = SECTIONS.filter(s => !s.secret || secretOpen(s.secret));
+  if (!secs.some(s => s.id === shopSec)) shopSec = secs[0].id;
   $('#shopStage').innerHTML = avatarSVG(lookNow());
-  $('#tabs').innerHTML = SECTIONS.map(s => `<button class="tab ${s.id === shopSec ? 'on' : ''}" data-s="${s.id}">${s.name}</button>`).join('');
+  $('#tabs').innerHTML = secs.map(s => `<button class="tab ${s.secret ? 'secret' : ''} ${s.id === shopSec ? 'on' : ''}" data-s="${s.id}">${s.name}</button>`).join('');
   $$('#tabs .tab').forEach(b => b.onclick = () => { shopSec = b.dataset.s; preview = null; SND.tap(); renderShop(); });
   const sec = SECTIONS.find(s => s.id === shopSec);
   $('#shopBody').innerHTML = sec.cats.map(cat => {
-    const c = CAT[cat];
-    return `<h3 class="cat-h">${c.label}</h3><div class="grid">` + c.items.map(it => {
+    const c = CAT[cat], its = shopItems(cat, sec);
+    if (sec.secret) its.unshift(NONE); // a way to take the secret thing off again
+    return `<h3 class="cat-h">${c.label}</h3><div class="grid">` + its.map(it => {
       const own = isOwned(cat, it.id), on = S.look[cat] === it.id, pv = preview && preview.cat === cat && preview.id === it.id;
       let vis;
       if (c.type === 'color') vis = it.id === 'none' ? '<div class="sw none">🚫</div>' : `<div class="sw" style="background:${it.css || it.color}"></div>`;
       else vis = avatarSVG(withItem(S.look, cat, it.id), c.zoom || 'full');
-      const price = own ? `<span class="pr own">${on ? '✓ עליי' : 'שלי'}</span>` : `<span class="pr">${it.price} 🪙</span>`;
+      const price = own ? `<span class="pr own">${it.hours ? `${on ? '✓ ' : ''}⏳ ${hoursLeft(cat, it.id)} שע׳` : on ? '✓ עליי' : 'שלי'}</span>` : `<span class="pr">${it.price} 🪙</span>`;
       return `<button class="tile ${on ? 'on' : ''} ${own ? '' : 'locked'} ${pv ? 'pv' : ''} ${!own && it.price > S.coins ? 'cant' : ''}" data-c="${cat}" data-i="${it.id}">${vis}<span class="tn">${it.name}</span>${price}</button>`;
     }).join('') + '</div>';
   }).join('');
@@ -2128,7 +2216,8 @@ function renderPv() {
   if (!preview) { bar.hidden = true; return; }
   const it = item(preview.cat, preview.id), can = S.coins >= it.price;
   bar.hidden = false;
-  bar.innerHTML = `<div class="info">${it.name} · ${it.price} 🪙<small>${can ? 'תצוגה מקדימה – רוצים לקנות?' : `חסרים עוד ${it.price - S.coins} מטבעות – בואו נפתור תרגילים!`}</small></div>` +
+  const note = it.hours ? ` · ל-${it.hours} שעות` : '';
+  bar.innerHTML = `<div class="info">${it.name} · ${it.price} 🪙${note}<small>${can ? 'תצוגה מקדימה – רוצים לקנות?' : `חסרים עוד ${it.price - S.coins} מטבעות – בואו נפתור תרגילים!`}</small></div>` +
     (can ? `<button class="btn green" id="buyBtn">קנייה!</button>` : `<button class="btn primary" id="earnBtn">✏️ לתרגל</button>`) +
     `<button class="btn" id="pvX">✕</button>`;
   if (can) $('#buyBtn').onclick = buy;
@@ -2139,9 +2228,12 @@ function buy() {
   const { cat, id } = preview, it = item(cat, id);
   if (S.coins < it.price) return;
   track('buy-' + cat);
-  S.coins -= it.price; S.owned.push(cat + ':' + id); S.look = withItem(S.look, cat, id); preview = null; save();
+  const k = cat + ':' + id;
+  S.coins -= it.price; if (!S.owned.includes(k)) S.owned.push(k);
+  if (it.hours) S.until[k] = Date.now() + it.hours * 36e5;
+  S.look = withItem(S.look, cat, id); preview = null; save();
   SND.buy(); confetti(); setCoins(true);
-  toast(`יש! ${it.name} עכשיו שלך 🎉`);
+  toast(it.hours ? `יש! ${it.name} שלך ל-${it.hours} שעות 😋` : `יש! ${it.name} עכשיו שלך 🎉`);
   renderShop();
   petAct($('#shopStage'), 'love');
   checkBadges();
@@ -2154,7 +2246,7 @@ function showStats() {
     return `<div class="stat"><span class="nm">${t.icon} ${t.name}</span><span class="bar"><div style="width:${pc}%"></div></span><span class="vl">${s.t ? pc + '% · ' + s.t : '—'}</span></div>`; }).join('');
   const total = answered(), gs = GRADES.filter(g => S.grades.includes(g) || gcount(g)), gmax = Math.max(1, ...gs.map(gcount));
   const grows = gs.map(g => `<div class="stat"><span class="nm">${GRADE_ICON[g]} כיתה ${GN[g]}</span><span class="bar"><div style="width:${Math.round(100 * gcount(g) / gmax)}%"></div></span><span class="vl">${gcount(g) ? F(gcount(g)) : '—'}</span></div>`).join('');
-  const bought = S.owned.length, all = Object.values(CAT).reduce((a, c) => a + c.items.filter(i => i.price > 0).length, 0);
+  const bought = S.owned.length, all = Object.keys(CAT).reduce((a, c) => a + visibleItems(c).filter(i => i.price > 0).length, 0);
   modal(`<h2>📊 ההתקדמות שלי</h2>
     <p>פתרת <b>${total}</b> תרגילים · הרווחת <b>${F(S.earnedTotal || 0)}</b> 🪙</p>
     <p>שיא באתגר 60 שניות: <b>${S.best || 0}</b> · פריטים שנקנו: <b>${bought}/${all}</b></p>
