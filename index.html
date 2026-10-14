@@ -533,7 +533,7 @@ const freshState = () => ({ created: false, name: '', coins: 15, owned: [], look
   tables: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], sound: true, stats: {}, lastDay: '', best: 0, earnedTotal: 0,
   badges: {}, streak: 0, bestStreak: 0, facts: [], retryWins: 0, mixCount: 0, petTaps: 0,
   days: 0, dayStreak: 0, bestDayStreak: 0, early: false, night: false,
-  trip: null, visits: {}, trips: 0, tripSpent: 0, tripSelfie: false });
+  trip: null, visits: {}, trips: 0, tripSpent: 0, tripSelfie: false, travelNews: false });
 let S = load();
 function load() {
   let s = null;
@@ -2297,6 +2297,18 @@ function lookNow() {
   return preview ? withItem(wearing(), preview.cat, preview.id) : wearing();
 }
 function openShop() { preview = null; renderShop(); show('shop'); }
+// shown once, the first time the game is opened after travel was added
+function travelNews() {
+  S.travelNews = true; save();
+  modal(`<h2>✈️ חדש: טיולים!</h2>
+    <div class="stage" style="width:min(60%,220px);margin:0 auto">${avatarSVG({ ...S.look, place: 'paris' })}</div>
+    <p>בחנות יש עכשיו לשונית טיולים! טסים עם ${esc(S.name)} לפריז, לפירמידות, ליפן ועד אנטארקטיקה 🐧</p>
+    <p class="muted">כל טיול נמשך יום שלם, ועל כל יעד מקבלים תג 🏅</p>
+    <button class="btn big pink" id="newsGo">🧳 לטיולים בחנות</button>
+    <button class="btn" id="newsLater">אחר כך</button>`);
+  $('#newsGo').onclick = () => { SND.tap(); closeModal(); shopSec = 'travel'; openShop(); };
+  $('#newsLater').onclick = () => { SND.tap(); closeModal(); };
+}
 function renderShop() {
   $('#shopStage').innerHTML = avatarSVG(lookNow());
   $('#tabs').innerHTML = SECTIONS.map(s => `<button class="tab ${s.id === shopSec ? 'on' : ''}" data-s="${s.id}">${s.name}</button>`).join('');
@@ -2444,6 +2456,7 @@ else {
   if (markDay()) setTimeout(() => { addCoins(10); toast('☀️ בונוס יומי! +10 מטבעות'); }, 500);
   setTimeout(checkBadges, 1200); // also awards badges earned before they existed
   if (!S.gradesSet) chooseGrades('חדש! אפשר לתרגל עכשיו מכיתה ב׳ ועד כיתה ט׳ 🎉');
+  else if (!S.travelNews) setTimeout(travelNews, 800);
 }
 </script>
 </body>
