@@ -110,6 +110,15 @@ button{font-family:inherit;color:inherit;touch-action:manipulation;cursor:pointe
 @keyframes roll{to{transform:rotate(360deg)}}
 @keyframes tw{from{opacity:.2}to{opacity:1}}
 .live .notes{animation:notes 2.6s ease-in-out infinite}
+.squishy,.grip{transform-box:fill-box;transform-origin:50% 100%}
+.act-squish .squishy{animation:squish .55s ease-out}
+@keyframes squish{0%{transform:scale(1)}30%{transform:scale(1.16,.78)}62%{transform:scale(.94,1.07)}100%{transform:scale(1)}}
+.act-squish .grip{animation:grip .55s ease-out}
+@keyframes grip{30%{transform:scale(.93,.97) translateY(-1px)}100%{transform:scale(1)}}
+.act-squish .sq-open{animation:sqhide .55s steps(1)}
+.act-squish .sq-shut,.act-squish .sqfx{animation:sqshow .55s steps(1)}
+@keyframes sqhide{0%,70%{opacity:0}100%{opacity:1}}
+@keyframes sqshow{0%,70%{opacity:1}100%{opacity:0}}
 @keyframes notes{0%{opacity:0;transform:translateY(6px)}40%{opacity:1}100%{opacity:0;transform:translateY(-12px)}}
 /* badges */
 .medal{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;width:58px;height:58px;border-radius:50%;font-size:1.8rem;line-height:1;position:relative;box-shadow:inset 0 -4px 0 rgba(0,0,0,.12),0 2px 0 rgba(0,0,0,.08)}
@@ -487,7 +496,7 @@ const CAT = {
     I('anchor', 'עוגן', 20), I('rose', 'ורד', 25), I('rainbow', 'קשת', 25), I('mom', 'לב אמא', 30)] },
   held: { label: 'ביד', type: 'style', zoom: 'full', items: [
     NONE, I('lollipop', 'סוכרייה', 15), I('icecream', 'גלידה', 20), I('balloon', 'בלון', 20), I('heartballoon', 'בלון לב', 25),
-    I('starballoon', 'בלון כוכב', 30), I('wand', 'שרביט קסמים', 35), I('balloons', 'צרור בלונים', 40), I('yarn', 'כדור צמר', 25),
+    I('starballoon', 'בלון כוכב', 30), I('dumpling', 'סקווישי כיסון', 30), I('strawberry', 'סקווישי תות', 30), I('wand', 'שרביט קסמים', 35), I('balloons', 'צרור בלונים', 40), I('yarn', 'כדור צמר', 25),
     I('burger', 'המבורגר', 50, { secret: 1, hours: 24 })] },
   music: { label: 'כלי נגינה', type: 'style', zoom: 'full', items: [
     NONE, I('recorder', 'חלילית', 20), I('maracas', 'מרקס', 20), I('tambourine', 'טמבורין', 25), I('mic', 'מיקרופון', 30),
@@ -603,14 +612,34 @@ function timeLeft() {
    sound + effects
    ========================================================= */
 let AC = null;
+function audio() {
+  AC = AC || new (window.AudioContext || window.webkitAudioContext)();
+  if (AC.state === 'suspended') AC.resume();
+  return AC;
+}
 function tone(f, dur = 0.12, type = 'sine', when = 0, vol = 0.13) {
   if (!S.sound) return;
   try {
-    AC = AC || new (window.AudioContext || window.webkitAudioContext)();
-    if (AC.state === 'suspended') AC.resume();
+    audio();
     const t = AC.currentTime + when, o = AC.createOscillator(), g = AC.createGain();
     o.type = type; o.frequency.value = f;
     g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+    o.connect(g); g.connect(AC.destination); o.start(t); o.stop(t + dur + 0.02);
+  } catch (e) {}
+}
+// a pitch glide through fs (with an optional wobble) – rubbery squeaks for the squishies
+function sweep(fs, dur, type = 'sine', vol = 0.13, wob = 0, when = 0) {
+  if (!S.sound) return;
+  try {
+    audio();
+    const t = AC.currentTime + when, o = AC.createOscillator(), g = AC.createGain();
+    o.type = type; o.frequency.setValueAtTime(fs[0], t);
+    fs.slice(1).forEach((f, i) => o.frequency.exponentialRampToValueAtTime(f, t + dur * (i + 1) / (fs.length - 1)));
+    if (wob) {
+      const l = AC.createOscillator(), lg = AC.createGain();
+      l.frequency.value = 26; lg.gain.value = wob; l.connect(lg); lg.connect(o.frequency); l.start(t); l.stop(t + dur + 0.02);
+    }
+    g.gain.setValueAtTime(0.001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.02); g.gain.exponentialRampToValueAtTime(0.001, t + dur);
     o.connect(g); g.connect(AC.destination); o.start(t); o.stop(t + dur + 0.02);
   } catch (e) {}
 }
@@ -620,6 +649,10 @@ const SND = {
   coin() { tone(1320, .07, 'square', 0, .04); tone(1760, .12, 'square', .06, .04); },
   buy() { [523, 659, 784, 1047].forEach((f, i) => tone(f, .16, 'triangle', i * .08)); },
   tap() { tone(520, .05, 'sine', 0, .06); },
+  squish(kind, v = 1) {
+    if (kind === 'dumpling') { sweep([320, 640, 160], .34, 'triangle', .2 * v, 40); sweep([240, 120], .12, 'sine', .12 * v, 0, .3); }
+    else { sweep([900, 1700, 1050], .2, 'sine', .14 * v, 70); sweep([1000, 1500, 900], .16, 'sine', .1 * v, 70, .2); }
+  },
   fanfare() { [523, 659, 784, 659, 784, 1047].forEach((f, i) => tone(f, .18, 'triangle', i * .11)); },
 };
 function toast(msg, ms = 2200) {
@@ -1034,6 +1067,18 @@ const HELD = {
     [[159, 131], [167, 128], [175, 131], [163, 135], [171, 135]].map(([x, y]) => `<ellipse cx="${x}" cy="${y}" rx="1.5" ry=".9" fill="#fff7ed"/>`).join('') + `<path d="M156,130 Q160,126 165,125" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round" opacity=".45"/>`,
   lollipop: () => `<path d="M167,174 L167,124" stroke="#f1f5f9" stroke-width="3.5"/><circle cx="167" cy="110" r="15" fill="#f472b6"/><circle cx="167" cy="110" r="11" fill="#fde047"/><circle cx="167" cy="110" r="7" fill="#7dd3fc"/><circle cx="167" cy="110" r="3" fill="#fff"/>`,
 };
+// squishies sit on the palm with the fist over their bottom; .act-squish on the stage squeezes them
+const SQFX = `<g class="sqfx" opacity="0" stroke="#a78bfa" stroke-width="1.8" stroke-linecap="round"><path d="M146,146 l-6,-3 M145,153 l-7,0 M188,146 l6,-3 M189,153 l7,0"/></g>`;
+const sqFace = (y, k) => `<g class="sq-open"><circle cx="161" cy="${y}" r="1.8" fill="${k}"/><circle cx="173" cy="${y}" r="1.8" fill="${k}"/><circle cx="161.6" cy="${y - .7}" r=".6" fill="#fff"/><circle cx="173.6" cy="${y - .7}" r=".6" fill="#fff"/></g>` +
+  `<g class="sq-shut" opacity="0" stroke="${k}" stroke-width="1.3" fill="none" stroke-linecap="round"><path d="M159,${y - 2} l3,2 l-3,2 M175,${y - 2} l-3,2 l3,2"/></g>` +
+  `<ellipse cx="156.5" cy="${y + 3}" rx="2.8" ry="1.7" fill="#fb7185" opacity=".55"/><ellipse cx="177.5" cy="${y + 3}" rx="2.8" ry="1.7" fill="#fb7185" opacity=".55"/>` +
+  `<path d="M164.5,${y + 2.5} q1.25,1.6 2.5,0 q1.25,1.6 2.5,0" stroke="${k}" stroke-width="1" fill="none" stroke-linecap="round"/>`;
+const SQUISHY = {
+  dumpling: () => SQFX + `<g class="squishy"><path d="M149,165 Q146,147 161,142 Q167,136 173,142 Q188,147 185,165 Q167,171 149,165 Z" fill="#fff7ed" stroke="#e7cfa8" stroke-width="1.2"/><path d="M167,140 Q159,144 155,152 M167,140 Q163,145 162,150 M167,140 Q171,145 172,150 M167,140 Q175,144 179,152" stroke="#e7cfa8" stroke-width="1.2" fill="none" stroke-linecap="round"/><circle cx="167" cy="139.5" r="2.6" fill="#fdecd2" stroke="#e7cfa8" stroke-width="1"/>${sqFace(155, '#57361f')}</g>`,
+  strawberry: () => SQFX + `<g class="squishy"><path d="M167,170 C151,164 146,148 152,141 C156,136 163,137 167,140 C171,137 178,136 182,141 C188,148 183,164 167,170 Z" fill="#fb4f6e"/>` +
+    [[156, 146], [178, 146], [158, 162], [176, 162], [167, 165], [151, 154], [183, 154]].map(([x, y]) => `<ellipse cx="${x}" cy="${y}" rx="1" ry="1.5" fill="#fde68a"/>`).join('') +
+    `<path d="M167,141 L158,135 L163,141 L156,141 L164,144 L167,147 L170,144 L178,141 L171,141 L176,135 Z" fill="#22c55e" stroke="#15803d" stroke-width=".8" stroke-linejoin="round"/><path d="M167,138 L167,131" stroke="#15803d" stroke-width="2" stroke-linecap="round"/><ellipse cx="156" cy="145" rx="2.4" ry="4" fill="#fff" opacity=".35" transform="rotate(25 156 145)"/>${sqFace(153, '#4c0519')}</g>`,
+};
 const NOTES = `<g class="notes"><text x="146" y="128" font-size="13" fill="#7c3aed">♪</text><text x="186" y="118" font-size="11" fill="#ec4899">♫</text></g>`;
 const MUSIC = {
   recorder: () => `<rect x="163" y="112" width="9" height="11" rx="3" fill="#fde68a" stroke="#b45309" stroke-width=".8"/><rect x="164" y="120" width="7" height="64" rx="3" fill="#fef3c7" stroke="#d6b98c" stroke-width=".8"/>` + [128, 135, 142, 149, 156].map(y => `<circle cx="167.5" cy="${y}" r="1.4" fill="#78350f"/>`).join('') + NOTES,
@@ -1065,8 +1110,8 @@ function armSVG(L, skin) {
     const fingers = [158.5, 163.2, 167.9, 172.6].map((x, i) => `<rect x="${x}" y="${150 + (i === 0 || i === 3 ? 4 : 0)}" width="4.6" height="18" rx="2.3" fill="${skin}"/>`).join('');
     return `<g class="wave">${fore}${decor}${fingers}<ellipse cx="167" cy="171" rx="10.5" ry="11" fill="${skin}"/><ellipse cx="179" cy="173" rx="3.6" ry="7" fill="${skin}" transform="rotate(40 179 173)"/></g>`;
   }
-  const thing = (HELD[held] || MUSIC[held])();
-  const fist = `<ellipse cx="167" cy="171" rx="10.5" ry="11" fill="${skin}"/><path d="M158.5,165 Q162.5,163 166,166 M158.5,170.5 Q162.5,168.5 166,171.5 M159.5,176 Q163,174 166,177" stroke="${line}" stroke-width="1.3" fill="none" stroke-linecap="round"/><ellipse cx="175" cy="165" rx="4" ry="6.5" fill="${skin}" stroke="${line}" stroke-width=".6" transform="rotate(25 175 165)"/>`;
+  const thing = (SQUISHY[held] || HELD[held] || MUSIC[held])();
+  const fist = `<g${SQUISHY[held] ? ' class="grip"' : ''}><ellipse cx="167" cy="171" rx="10.5" ry="11" fill="${skin}"/><path d="M158.5,165 Q162.5,163 166,166 M158.5,170.5 Q162.5,168.5 166,171.5 M159.5,176 Q163,174 166,177" stroke="${line}" stroke-width="1.3" fill="none" stroke-linecap="round"/><ellipse cx="175" cy="165" rx="4" ry="6.5" fill="${skin}" stroke="${line}" stroke-width=".6" transform="rotate(25 175 165)"/></g>`;
   return fore + decor + thing + fist;
 }
 
@@ -1126,6 +1171,16 @@ function petAct(el, act) {
   el.classList.add('act-' + act);
   clearTimeout(el._petT);
   el._petT = setTimeout(() => el.classList.remove('act-' + act), act === 'sleep' ? 2600 : 1600);
+}
+// the character squeezes the squishy in their hand and it squeaks
+function squish(el, v = 1) {
+  if (!el || !el.querySelector('.squishy')) return false;
+  const L = el.id === 'shopStage' ? lookNow() : S.look;
+  if (!SQUISHY[L.held]) return false;
+  el.classList.remove('act-squish'); void el.offsetWidth; el.classList.add('act-squish');
+  clearTimeout(el._sqT); el._sqT = setTimeout(() => el.classList.remove('act-squish'), 600);
+  SND.squish(L.held, v);
+  return true;
 }
 const VIEW = { full: '0 0 200 220', head: '18 0 164 168', face: '52 64 96 80', body: '10 40 180 180', arm: '136 150 62 70', pet: '0 86 96 96' };
 function avatarSVG(L, view = 'full') {
@@ -1893,12 +1948,13 @@ $('#goShop').onclick = () => { SND.tap(); openShop(); };
 $('#goStats').onclick = () => { SND.tap(); showStats(); };
 $('#goSettings').onclick = () => { SND.tap(); showSettings(); };
 $('#homeStage').onclick = e => {
+  const sq = squish($('#homeStage'));
   if (S.look.pet !== 'none') {
-    petAct($('#homeStage'), P(['love', 'jump', 'spin'])); $('#bubble').textContent = PET_SAY[S.look.pet]; SND.coin(); S.petTaps++; save();
+    petAct($('#homeStage'), P(['love', 'jump', 'spin'])); $('#bubble').textContent = PET_SAY[S.look.pet]; if (!sq) SND.coin(); S.petTaps++; save();
     secretCatTap(!!e.target.closest('.pet'));
     checkBadges();
   }
-  else { $('#bubble').textContent = bubbleText(); SND.tap(); }
+  else { $('#bubble').textContent = sq ? 'סקוויש! 🤭' : bubbleText(); if (!sq) SND.tap(); }
 };
 /* ---------- easter egg #1: a cat on the shoulder, a ball of yarn in the hand, and 10 pats in a row on the cat ---------- */
 const CAT_PATS = 10;
@@ -1928,7 +1984,11 @@ setInterval(() => {
 }, 60000);
 // the pet does something cute every few seconds
 setInterval(() => {
-  ['#homeStage', '#shopStage'].forEach(id => { const el = $(id); if (el && el.offsetParent && Math.random() < .7) petAct(el); });
+  ['#homeStage', '#shopStage'].forEach(id => {
+    const el = $(id); if (!el || !el.offsetParent) return;
+    if (Math.random() < .7) petAct(el);
+    if (Math.random() < .4) squish(el, .5); // a quiet squeeze now and then
+  });
 }, 4500);
 // a trip that ends while the game is open sends the character home
 setInterval(() => {
@@ -2479,6 +2539,7 @@ function tapItem(cat, id) {
   if (isOwned(cat, id)) { S.look = withItem(S.look, cat, id); preview = null; save(); SND.tap(); checkBadges(); }
   else { preview = { cat, id }; SND.tap(); }
   renderShop();
+  if (SQUISHY[id] && cat === 'held') squish($('#shopStage'));
 }
 function renderPv() {
   const bar = $('#pvbar');
@@ -2506,8 +2567,10 @@ function buy() {
   toast(it.hours ? `יש! ${it.name} שלך ל-${it.hours} שעות 😋` : `יש! ${it.name} עכשיו שלך 🎉`);
   renderShop();
   petAct($('#shopStage'), 'love');
+  squish($('#shopStage'));
   checkBadges();
 }
+$('#shopStage').onclick = () => squish($('#shopStage'));
 $('#shopBack').onclick = () => { SND.tap(); preview = null; go('home'); };
 
 /* ---------- stats & settings ---------- */
