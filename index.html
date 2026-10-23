@@ -486,6 +486,17 @@ const CAT = {
   bg: { label: 'רקע', type: 'style', zoom: 'full', items: [
     I('pastel', 'פסטל'), I('sky', 'שמיים', 15), I('sunset', 'שקיעה', 20), I('sea', 'ים', 25), I('forest', 'יער', 25),
     I('hearts', 'לבבות', 30), I('space', 'חלל', 40), I('rainbow', 'קשת', 50)] },
+  costume: { label: 'תחפושות', type: 'style', zoom: 'body', items: [
+    NONE, I('doctor', 'רופא/ה', 45), I('nurse', 'אח/ות', 45), I('pilot', 'טייס/ת', 50), I('scientist', 'מדען/ית', 50),
+    I('detective', 'בלש/ית', 50), I('clown', 'ליצן/ית', 45), I('singer', 'זמר/ת', 55), I('astronaut', 'אסטרונאוט/ית', 70),
+    I('samurai', 'סמוראי', 70), I('diver', 'צוללן/ית', 60)] },
+  hat: { label: 'כובעים ומסכות לתחפושת', type: 'style', zoom: 'head', items: [
+    NONE, I('headmirror', 'מראת רופא', 25), I('nursecap', 'כובע אחות', 25), I('pilotcap', 'כובע טייס', 35),
+    I('goggles', 'משקפי מגן', 30), I('deerstalker', 'כובע בלש', 35), I('clown', 'פאה ואף ליצן', 35), I('headset', 'מיקרופון ראש', 35),
+    I('spacehelmet', 'קסדת חלל', 50), I('kabuto', 'קסדת סמוראי', 50), I('divemask', 'מסכה ושנורקל', 40)] },
+  prop: { label: 'אביזרים ביד', type: 'style', zoom: 'full', items: [
+    NONE, I('thermometer', 'מדחום', 20), I('plane', 'מטוס צעצוע', 30), I('testtube', 'מבחנה מבעבעת', 30),
+    I('magnifier', 'זכוכית מגדלת', 30), I('juggle', 'כדורי ג׳אגלינג', 30), I('rocket', 'טיל צעצוע', 35), I('katana', 'חרב סמוראי', 40)] },
 };
 const SECTIONS = [
   { id: 'hair', name: '💇 שיער', cats: ['hairStyle', 'hairColor'] },
@@ -495,6 +506,7 @@ const SECTIONS = [
   { id: 'jewel', name: '💍 תכשיטים', cats: ['neck', 'earrings', 'bracelet'] },
   { id: 'acc', name: '👑 אביזרים', cats: ['head', 'glasses'] },
   { id: 'hand', name: '🎈 ביד', cats: ['held', 'music'] },
+  { id: 'costume', name: '🎭 תחפושות', cats: ['costume', 'hat', 'prop'] },
   { id: 'tattoo', name: '🦋 קעקועים', cats: ['tattoo'] },
   { id: 'face', name: '😊 פנים', cats: ['skin', 'eyes', 'mouth', 'face'] },
   { id: 'bg', name: '🌈 רקע', cats: ['bg'] },
@@ -504,10 +516,10 @@ const item = (cat, id) => CAT[cat].items.find(i => i.id === id) || CAT[cat].item
 const DEFAULT_LOOK = { skin: 's2', hairStyle: 'long', hairColor: 'brown', eyes: 'brown', mouth: 'smile', face: 'none',
   lips: 'none', blush: 'none', shadow: 'none', lashes: 'none', outfit: 'tshirt', outfitColor: 'pink', neck: 'none',
   head: 'none', glasses: 'none', earrings: 'none', bg: 'pastel',
-  bracelet: 'none', tattoo: 'none', held: 'none', music: 'none', pet: 'none' };
-// one hand can hold only one thing
-const EXCLUSIVE = { held: 'music', music: 'held' };
-function withItem(L, cat, id) { const o = { ...L, [cat]: id }; if (EXCLUSIVE[cat] && id !== 'none') o[EXCLUSIVE[cat]] = 'none'; return o; }
+  bracelet: 'none', tattoo: 'none', held: 'none', music: 'none', pet: 'none', costume: 'none', hat: 'none', prop: 'none' };
+// one hand can hold only one thing, one thing on the head, and picking clothes takes the costume off
+const EXCLUSIVE = { held: ['music', 'prop'], music: ['held', 'prop'], prop: ['held', 'music'], head: ['hat'], hat: ['head'], outfit: ['costume'] };
+function withItem(L, cat, id) { const o = { ...L, [cat]: id }; if (EXCLUSIVE[cat] && id !== 'none') EXCLUSIVE[cat].forEach(c => { o[c] = 'none'; }); return o; }
 const PRESETS = [
   { name: 'מאיה', look: { skin: 's2', hairStyle: 'long', hairColor: 'brown', eyes: 'green', outfitColor: 'pink' } },
   { name: 'יואב', look: { skin: 's3', hairStyle: 'short', hairColor: 'black', eyes: 'brown', outfitColor: 'blue', mouth: 'grin' } },
@@ -619,6 +631,7 @@ function globalDefs() {
     ${lg('bg-hearts', ['#fdf2f8', '#fbcfe8'])}
     ${lg('bg-space', ['#0b1026', '#3b2a7a'])}
     ${lg('bg-rainbow', ['#e0f2fe', '#fdf4ff'])}
+    <pattern id="pt-lam" width="12" height="9" patternUnits="userSpaceOnUse"><rect width="12" height="9" fill="#991b1b"/><rect y="7" width="12" height="2" fill="#450a0a"/><circle cx="6" cy="4" r="1.1" fill="#fbbf24"/></pattern>
     ${pats}</defs></svg>`;
   document.body.insertAdjacentHTML('afterbegin', defs);
 }
@@ -707,9 +720,62 @@ const NECK = {
   goldchain: () => `<path d="M82,152 Q100,184 118,152" stroke="#b7791f" stroke-width="6" fill="none" stroke-dasharray="5 2.5"/><path d="M82,152 Q100,184 118,152" stroke="#fde047" stroke-width="2.5" fill="none" stroke-dasharray="5 2.5"/><circle cx="100" cy="172" r="7" fill="url(#g-gold)" stroke="#b7791f" stroke-width="1.5"/>${star(100, 172, 4, '#fff7d1')}`,
   medal: () => `<path d="M88,150 L100,184 L112,150" stroke="#3b82f6" stroke-width="6" fill="none"/><circle cx="100" cy="192" r="11" fill="url(#g-gold)" stroke="#b7791f" stroke-width="2"/>${star(100, 192, 6, '#fff7d1')}`,
 };
+const TORSO = 'M26,220 C26,178 52,160 86,152 L114,152 C148,160 174,178 174,220 Z';
+/* ---------- costumes: drawn instead of the outfit; the outfit colour is used for small details ---------- */
+const COAT_LAPELS = c => `<path d="M86,152 L81,172 L95,184 L94,220 M114,152 L119,172 L105,184 L106,220" stroke="${c}" stroke-width="2.5" fill="none" stroke-linejoin="round"/>`;
+const COSTUME = {
+  doctor: (Cc, dk, ns) => `<path d="${TORSO}" fill="#f8fafc"/><path d="M86,152 L114,152 L106,220 L94,220 Z" fill="${Cc}"/><path d="M88,150 L112,150 L100,166 Z" fill="${ns}"/>${COAT_LAPELS('#cbd5e1')}` +
+    `<rect x="124" y="188" width="22" height="18" rx="3" fill="#fff" stroke="#cbd5e1" stroke-width="2"/><rect x="128" y="180" width="3.5" height="12" rx="1.5" fill="#3b82f6"/><rect x="134" y="182" width="3.5" height="10" rx="1.5" fill="#ef4444"/>` +
+    `<path d="M85,150 C72,176 80,198 100,200 C120,198 128,176 115,150" stroke="#334155" stroke-width="3.5" fill="none" stroke-linecap="round"/><path d="M100,200 L100,206" stroke="#334155" stroke-width="3.5"/><circle cx="100" cy="211" r="6" fill="#cbd5e1" stroke="#334155" stroke-width="2.5"/>`,
+  nurse: (Cc, dk, ns) => `<path d="${TORSO}" fill="${Cc}"/><path d="M86,150 L114,150 L100,176 Z" fill="${ns}"/><path d="M86,152 L100,177 L114,152" stroke="${dk}" stroke-width="3.5" fill="none" stroke-linejoin="round"/>` +
+    `<path d="M122,188 L146,188 L146,206 Q134,210 122,206 Z" fill="${dk}" opacity=".45"/><rect x="127" y="181" width="3.5" height="11" rx="1.5" fill="#fff"/><circle cx="139" cy="196" r="5" fill="#fff" stroke="#94a3b8" stroke-width="1.5"/><path d="M139,193 L139,196 L141,197" stroke="#334155" stroke-width="1" fill="none"/>` +
+    `<rect x="56" y="184" width="26" height="20" rx="4" fill="#fff" stroke="#e5e7eb"/><path d="M69,188 L69,200 M63,194 L75,194" stroke="#ef4444" stroke-width="4.5"/>`,
+  pilot: () => `<path d="${TORSO}" fill="#1e3a8a"/><path d="M86,151 L114,151 L100,196 Z" fill="#f8fafc"/><path d="M96,154 L104,154 L102,160 L98,160 Z M98,160 L102,160 L104,186 L100,192 L96,186 Z" fill="#0f172a"/><path d="M86,152 L100,197 L114,152" stroke="#172554" stroke-width="3" fill="none"/>` +
+    [[-28, 52], [28, 148]].map(([r, x]) => `<g transform="rotate(${r} ${x} 174)"><rect x="${x - 15}" y="169" width="30" height="10" rx="3" fill="#0f172a"/><path d="M${x - 7},170 L${x - 7},178 M${x},170 L${x},178 M${x + 7},170 L${x + 7},178" stroke="#fbbf24" stroke-width="2.2"/></g>`).join('') +
+    `<path d="M120,188 Q126,183 133,188 Q140,183 146,188 L142,192 Q133,189 124,192 Z" fill="url(#g-gold)" stroke="#b7791f" stroke-width=".8"/><circle cx="133" cy="189" r="3" fill="url(#g-gold)" stroke="#b7791f" stroke-width=".8"/>` +
+    `<circle cx="100" cy="205" r="3" fill="url(#g-gold)"/><circle cx="100" cy="215" r="3" fill="url(#g-gold)"/>`,
+  scientist: (Cc, dk, ns) => `<path d="${TORSO}" fill="#f1f5f9"/><path d="M86,152 L114,152 L106,220 L94,220 Z" fill="#bae6fd"/><path d="M88,150 L112,150 L100,164 Z" fill="${ns}"/>` +
+    `<path d="M100,164 L88,157 L88,171 Z M100,164 L112,157 L112,171 Z" fill="${Cc}"/><circle cx="100" cy="164" r="3" fill="${dk}"/>${COAT_LAPELS('#94a3b8')}` +
+    `<rect x="54" y="188" width="24" height="18" rx="3" fill="#fff" stroke="#94a3b8" stroke-width="2"/>` + ['#ef4444', '#22c55e', '#3b82f6'].map((c, i) => `<rect x="${57 + i * 6.5}" y="${180 + (i % 2) * 2}" width="3.5" height="12" rx="1.5" fill="${c}"/>`).join('') +
+    `<g fill="none" stroke="${Cc}" stroke-width="1.8"><ellipse cx="134" cy="194" rx="11" ry="4"/><ellipse cx="134" cy="194" rx="11" ry="4" transform="rotate(60 134 194)"/><ellipse cx="134" cy="194" rx="11" ry="4" transform="rotate(-60 134 194)"/></g><circle cx="134" cy="194" r="2.5" fill="${dk}"/>` +
+    `<path d="M118,212 q4,-6 8,-1 q5,-3 6,3 q-6,5 -14,-2 Z" fill="#86efac" opacity=".8"/>`,
+  detective: Cc => `<path d="${TORSO}" fill="#c8a165"/><path d="M86,151 L114,151 L100,188 Z" fill="#f8fafc"/><path d="M98,156 L102,156 L104,180 L100,186 L96,180 Z" fill="${Cc}"/>` +
+    `<path d="M86,150 L70,166 L84,174 L100,190 Z M114,150 L130,166 L116,174 L100,190 Z" fill="#b48a4e" stroke="#8a6a3a" stroke-width="1.5" stroke-linejoin="round"/>` +
+    `<path d="M31,198 L169,198 L170,208 L30,208 Z" fill="#8a6a3a"/><rect x="92" y="196" width="16" height="14" rx="2" fill="none" stroke="#fde68a" stroke-width="2.5"/>` +
+    [[86, 216], [114, 216], [80, 184], [120, 184]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="2.8" fill="#6b4f2a"/>`).join(''),
+  clown: (Cc, dk, ns) => `<path d="${TORSO}" fill="${Cc}"/>` +
+    [[50, 198, '#facc15'], [72, 180, '#22c55e'], [130, 180, '#3b82f6'], [152, 200, '#facc15'], [118, 210, '#ef4444'], [76, 212, '#a855f7'], [40, 214, '#3b82f6'], [160, 216, '#22c55e']]
+      .map(([x, y, c]) => `<circle cx="${x}" cy="${y}" r="7" fill="${c === Cc ? '#fff' : c}" opacity=".9"/>`).join('') +
+    [0, 1, 2].map(i => `<circle cx="100" cy="${180 + i * 16}" r="6" fill="${['#ef4444', '#facc15', '#3b82f6'][i]}" stroke="#fff" stroke-width="2"/>`).join('') +
+    Array.from({ length: 9 }, (_, i) => { const t = Math.PI * i / 8; return `<circle cx="${(100 - 34 * Math.cos(t)).toFixed(1)}" cy="${(152 + 10 * Math.sin(t)).toFixed(1)}" r="8.5" fill="#fff" stroke="#e5e7eb" stroke-width="1.5"/>`; }).join(''),
+  singer: (Cc, dk, ns) => { const lt = shade(Cc, .5);
+    return `<path d="${TORSO}" fill="${Cc}"/>` +
+      [[44, 200], [58, 184], [70, 198], [62, 214], [80, 210], [136, 182], [130, 200], [146, 196], [158, 210], [120, 214], [88, 188], [112, 188], [40, 216], [150, 180]]
+        .map(([x, y], i) => i % 3 ? `<circle cx="${x}" cy="${y}" r="2.4" fill="${lt}"/>` : sparkle(x, y, 5, '#fff')).join('') +
+      `<path d="M84,150 L116,150 L116,154 Q100,178 84,154 Z" fill="${ns}"/><path d="M85,155 Q100,178 115,155" stroke="#fbbf24" stroke-width="3.5" fill="none" stroke-linecap="round"/>` +
+      star(100, 199, 13, 'url(#g-gold)', 'stroke="#ca8a04" stroke-width="1.5" stroke-linejoin="round"'); },
+  astronaut: Cc => `<path d="${TORSO}" fill="#f8fafc" stroke="#cbd5e1" stroke-width="2"/><path d="M34,200 L58,200 M142,200 L166,200" stroke="${Cc}" stroke-width="6" stroke-linecap="round"/>` +
+    `<ellipse cx="100" cy="153" rx="24" ry="7" fill="#94a3b8"/><ellipse cx="100" cy="151" rx="17" ry="4" fill="#64748b"/>` +
+    `<rect x="82" y="178" width="36" height="24" rx="4" fill="#e2e8f0" stroke="#64748b" stroke-width="2"/><rect x="86" y="182" width="14" height="8" rx="1.5" fill="#0f172a"/><path d="M88,186 L91,184 L94,187 L97,185" stroke="#4ade80" stroke-width="1.2" fill="none"/>` +
+    `<circle cx="106" cy="186" r="3" fill="#ef4444"/><circle cx="113" cy="186" r="3" fill="#22c55e"/><rect x="87" y="194" width="26" height="4" rx="2" fill="#3b82f6"/><path d="M118,196 Q136,204 150,216" stroke="#64748b" stroke-width="3" fill="none"/>` +
+    `<circle cx="140" cy="182" r="9" fill="#1d4ed8"/><ellipse cx="140" cy="182" rx="11" ry="3.5" fill="none" stroke="#ef4444" stroke-width="1.6" transform="rotate(-20 140 182)"/>${star(140, 182, 4, '#fff')}` +
+    `<rect x="52" y="176" width="20" height="13" rx="1.5" fill="#fff" stroke="#94a3b8"/><rect x="52" y="176" width="9" height="7" fill="#1d4ed8"/><path d="M61,178.5 L72,178.5 M61,183 L72,183 M52,187 L72,187" stroke="#ef4444" stroke-width="1.6"/>`,
+  samurai: (Cc, dk, ns) => `<path d="${TORSO}" fill="url(#pt-lam)"/><path d="M86,150 L114,150 L100,182 Z" fill="${ns}"/><path d="M84,150 L100,184 L116,150" stroke="#f8fafc" stroke-width="6" fill="none"/><path d="M90,150 L100,172 L110,150" stroke="${Cc}" stroke-width="3" fill="none"/>` +
+    [[-32, 46], [32, 154]].map(([r, x]) => `<g transform="rotate(${r} ${x} 182)"><rect x="${x - 19}" y="168" width="38" height="28" rx="3" fill="url(#pt-lam)" stroke="#450a0a" stroke-width="2"/></g>`).join('') +
+    `<rect x="28" y="210" width="144" height="10" fill="${Cc}"/><path d="M28,210 L172,210" stroke="${dk}" stroke-width="2"/>` +
+    `<circle cx="100" cy="197" r="9" fill="url(#g-gold)" stroke="#92400e" stroke-width="1.2"/>${flower(100, 197, 3.4, '#92400e')}`,
+  diver: (Cc, dk) => `<path d="${TORSO}" fill="#111827"/><path d="M26,220 C26,178 52,160 86,152 L88,161 C62,168 44,186 42,220 Z M174,220 C174,178 148,160 114,152 L112,161 C138,168 156,186 158,220 Z" fill="${Cc}"/>` +
+    `<path d="M86,145 L114,145 L114,157 Q100,162 86,157 Z" fill="#1f2937"/><path d="M100,160 L100,220" stroke="#6b7280" stroke-width="3" stroke-dasharray="2 2"/><rect x="97" y="160" width="6" height="10" rx="2" fill="#9ca3af"/>` +
+    `<path d="M118,192 q6,-6 12,0 t12,0" stroke="${Cc}" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M118,200 q6,-6 12,0 t12,0" stroke="${Cc}" stroke-width="3" fill="none" stroke-linecap="round" opacity=".6"/>`,
+};
+const BACK_COSTUME = {
+  astronaut: () => `<rect x="38" y="128" width="124" height="70" rx="16" fill="#cbd5e1" stroke="#94a3b8" stroke-width="2"/><rect x="44" y="134" width="12" height="20" rx="3" fill="#94a3b8"/><rect x="144" y="134" width="12" height="20" rx="3" fill="#94a3b8"/>`,
+  diver: () => [34, 144].map(x => `<rect x="${x + 7}" y="104" width="8" height="12" rx="2" fill="#6b7280"/><rect x="${x}" y="114" width="22" height="70" rx="11" fill="#facc15" stroke="#ca8a04" stroke-width="2"/><path d="M${x + 5},124 L${x + 5},170" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".5"/>`).join(''),
+};
 function outfitSVG(L, skin, neckSkin) {
   const oc = item('outfitColor', L.outfitColor), Cc = oc.color, dk = shade(Cc, -.22), lt = shade(Cc, .35);
-  const T = 'M26,220 C26,178 52,160 86,152 L114,152 C148,160 174,178 174,220 Z';
+  if (COSTUME[L.costume]) return COSTUME[L.costume](Cc, dk, neckSkin);
+  const T = TORSO;
   const roundNeck = `<path d="M86,148 L114,148 L114,153 Q100,172 86,153 Z" fill="${neckSkin}"/><path d="M87,154 Q100,171 113,154" stroke="${dk}" stroke-width="3.5" fill="none" stroke-linecap="round"/>`;
   switch (L.outfit) {
     case 'stripes': return `<path d="${T}" fill="url(#st-${oc.id})"/>${roundNeck}`;
@@ -723,6 +789,7 @@ function outfitSVG(L, skin, neckSkin) {
   }
 }
 function backOutfit(L) {
+  if (COSTUME[L.costume]) return BACK_COSTUME[L.costume] ? BACK_COSTUME[L.costume]() : '';
   const Cc = item('outfitColor', L.outfitColor).color;
   if (L.outfit === 'hero') { const cape = L.outfitColor === 'red' ? '#1d4ed8' : '#e11d48'; return `<path d="M50,160 L10,220 L190,220 L150,160 Z" fill="${cape}"/><path d="M50,160 L10,220 L30,220 Z" fill="${shade(cape, -.25)}"/>`; }
   if (L.outfit === 'hoodie') return `<path d="M58,172 C50,140 74,126 100,126 C126,126 150,140 142,172 Z" fill="${shade(Cc, -.2)}"/>`;
@@ -778,7 +845,32 @@ const GLASSES = {
   hearts: () => heart(82, 86, 28, '#ff4d8d', 'opacity=".75" stroke="#be185d" stroke-width="2" vector-effect="non-scaling-stroke"') + heart(118, 86, 28, '#ff4d8d', 'opacity=".75" stroke="#be185d" stroke-width="2" vector-effect="non-scaling-stroke"') + `<path d="M95,95 L105,95 M69,95 L56,92 M131,95 L144,92" stroke="#be185d" stroke-width="2.5"/>`,
   stars: () => star(82, 99, 17, '#facc15', 'opacity=".75" stroke="#d97706" stroke-width="2"') + star(118, 99, 17, '#facc15', 'opacity=".75" stroke="#d97706" stroke-width="2"') + `<path d="M97,96 L103,96" stroke="#d97706" stroke-width="2.5"/>`,
 };
+const HATS = {
+  headmirror: () => `<path d="M52,80 C48,30 152,30 148,80" stroke="#64748b" stroke-width="5" fill="none" stroke-linecap="round"/><circle cx="100" cy="46" r="14" fill="#e2e8f0" stroke="#94a3b8" stroke-width="3"/><circle cx="100" cy="46" r="4" fill="#475569"/><path d="M91,41 Q94,36 99,35" stroke="#fff" stroke-width="2.5" fill="none" stroke-linecap="round"/>`,
+  nursecap: () => `<path d="M64,48 Q100,38 136,48 L128,18 Q100,8 72,18 Z" fill="#fff" stroke="#e5e7eb" stroke-width="2" stroke-linejoin="round"/><path d="M100,19 L100,37 M91,28 L109,28" stroke="#ef4444" stroke-width="5"/>`,
+  pilotcap: () => `<path d="M60,38 L140,38 L140,60 L60,60 Z" fill="#1e3a8a"/><ellipse cx="100" cy="32" rx="58" ry="15" fill="#f8fafc" stroke="#cbd5e1" stroke-width="2"/><path d="M60,40 L140,40" stroke="#172554" stroke-width="3"/>` +
+    `<path d="M58,58 Q100,76 142,58 Q100,64 58,58 Z" fill="#0f172a"/><path d="M62,57 Q100,66 138,57" stroke="#fbbf24" stroke-width="2.2" fill="none"/>` +
+    `<path d="M84,48 Q90,44 96,48 M104,48 Q110,44 116,48" stroke="#fbbf24" stroke-width="2.5" fill="none" stroke-linecap="round"/><circle cx="100" cy="48" r="4.5" fill="url(#g-gold)" stroke="#b7791f" stroke-width=".8"/>`,
+  goggles: () => `<path d="M48,96 Q50,88 64,91 M152,96 Q150,88 136,91" stroke="#334155" stroke-width="6" fill="none" stroke-linecap="round"/><rect x="62" y="84" width="76" height="28" rx="13" fill="rgba(186,230,253,.4)" stroke="#f97316" stroke-width="4"/><path d="M100,86 L100,110" stroke="#f97316" stroke-width="3"/><path d="M68,92 L74,88 M106,92 L112,88" stroke="#fff" stroke-width="2.5" stroke-linecap="round" opacity=".8"/>`,
+  deerstalker: () => `<path d="M54,66 C50,14 150,14 146,66 Z" fill="#a16207"/><g stroke="#713f12" stroke-width="1.6" opacity=".55" fill="none"><path d="M78,22 Q70,44 68,66 M100,18 L100,66 M122,22 Q130,44 132,66 M54,48 Q100,36 146,48 M58,34 Q100,22 142,34"/></g>` +
+    `<path d="M60,62 Q100,80 140,62 Q100,68 60,62 Z" fill="#854d0e"/><path d="M90,22 Q100,12 110,22 M92,22 Q100,30 108,22" stroke="#713f12" stroke-width="2" fill="none"/><circle cx="100" cy="21" r="3.5" fill="#713f12"/>`,
+  clown: () => [[46, 66, 15, '#ef4444'], [38, 88, 14, '#f97316'], [52, 46, 13, '#facc15'], [154, 66, 15, '#3b82f6'], [162, 88, 14, '#22c55e'], [148, 46, 13, '#a855f7']].map(([x, y, r, c]) => `<circle cx="${x}" cy="${y}" r="${r}" fill="${c}"/>`).join('') +
+    `<rect x="86" y="10" width="28" height="26" rx="2" fill="#1f2937"/><rect x="78" y="34" width="44" height="6" rx="3" fill="#1f2937"/><rect x="86" y="26" width="28" height="5" fill="#ef4444"/><circle cx="114" cy="26" r="4" fill="#fde047"/>` +
+    `<circle cx="100" cy="109" r="8.5" fill="#ef4444"/><circle cx="97" cy="106" r="2.5" fill="#fff" opacity=".7"/>`,
+  headset: () => `<path d="M50,92 C44,24 156,24 150,92" stroke="#1f2937" stroke-width="5" fill="none"/><rect x="43" y="86" width="14" height="24" rx="6" fill="#1f2937"/><rect x="143" y="86" width="14" height="24" rx="6" fill="#1f2937"/>` +
+    `<path d="M52,106 Q58,130 84,127" stroke="#1f2937" stroke-width="3" fill="none" stroke-linecap="round"/><ellipse cx="87" cy="126.5" rx="5" ry="4" fill="#111"/>${star(150, 98, 4.5, '#facc15')}${star(50, 98, 4.5, '#facc15')}`,
+  spacehelmet: () => `<circle cx="100" cy="90" r="66" fill="rgba(186,230,253,.22)" stroke="#e2e8f0" stroke-width="7"/><circle cx="100" cy="90" r="66" fill="none" stroke="#94a3b8" stroke-width="1.5"/>` +
+    `<path d="M50,64 Q60,36 90,28" stroke="#fff" stroke-width="6" fill="none" stroke-linecap="round" opacity=".7"/><path d="M146,120 Q140,136 126,144" stroke="#fff" stroke-width="4" fill="none" stroke-linecap="round" opacity=".5"/>`,
+  kabuto: () => `<path d="M50,64 L34,74 L36,114 L56,106 Z M150,64 L166,74 L164,114 L144,106 Z" fill="url(#pt-lam)" stroke="#450a0a" stroke-width="1.5" stroke-linejoin="round"/>` +
+    `<path d="M50,70 C46,12 154,12 150,70 Z" fill="#1f2937"/><path d="M76,22 Q70,44 70,68 M100,17 L100,68 M124,22 Q130,44 130,68" stroke="#4b5563" stroke-width="2" fill="none"/>` +
+    `<path d="M46,66 Q100,82 154,66 L154,60 Q100,74 46,60 Z" fill="#111827"/><path d="M100,48 C88,40 76,20 72,2 C86,14 96,30 100,38 C104,30 114,14 128,2 C124,20 112,40 100,48 Z" fill="url(#g-gold)" stroke="#b7791f" stroke-width="1.2"/><circle cx="100" cy="52" r="6" fill="#dc2626" stroke="#fbbf24" stroke-width="1.5"/>`,
+  divemask: L => { const Cc = item('outfitColor', L.outfitColor).color;
+    return `<path d="M48,98 Q46,84 64,90 M152,98 Q154,84 136,90" stroke="${Cc}" stroke-width="6" fill="none" stroke-linecap="round"/>` +
+      `<path d="M64,84 Q100,76 136,84 Q142,104 130,114 Q114,118 106,110 Q100,104 94,110 Q86,118 70,114 Q58,104 64,84 Z" fill="rgba(125,211,252,.35)" stroke="#0ea5e9" stroke-width="4.5" stroke-linejoin="round"/><path d="M70,92 L78,86 M108,90 L116,85" stroke="#fff" stroke-width="2.5" stroke-linecap="round" opacity=".8"/>` +
+      `<path d="M110,126 Q140,130 148,110 L152,44" stroke="#f97316" stroke-width="6" fill="none" stroke-linecap="round"/><rect x="102" y="121" width="12" height="9" rx="3" fill="#1f2937"/>`; },
+};
 function headAcc(L, hair) {
+  if (HATS[L.hat]) return HATS[L.hat](L);
   switch (L.head) {
     case 'headband': return `<path d="M54,80 C50,24 150,24 146,80" stroke="#ff4d8d" stroke-width="7" fill="none" stroke-linecap="round"/>`;
     case 'bow': return `<g transform="rotate(18 130 44)"><path d="M130,44 L110,32 L111,58 Z M130,44 L150,30 L149,56 Z" fill="#ff4d8d" stroke="#db2777" stroke-width="1.5" stroke-linejoin="round"/><circle cx="130" cy="44" r="6" fill="#db2777"/></g>`;
@@ -828,6 +920,16 @@ const HELD = {
   icecream: () => `<polygon points="156,142 178,142 167,176" fill="#f4a460"/><path d="M160,148 L172,160 M164,144 L175,155 M174,148 L162,160 M170,144 L159,155" stroke="#c2773a" stroke-width="1"/><circle cx="161" cy="137" r="8.5" fill="#f9a8d4"/><circle cx="173" cy="137" r="8.5" fill="#6ee7b7"/><circle cx="167" cy="127" r="8.5" fill="#92400e"/><circle cx="167" cy="117" r="3.2" fill="#e11d48"/>`,
   lollipop: () => `<path d="M167,174 L167,124" stroke="#f1f5f9" stroke-width="3.5"/><circle cx="167" cy="110" r="15" fill="#f472b6"/><circle cx="167" cy="110" r="11" fill="#fde047"/><circle cx="167" cy="110" r="7" fill="#7dd3fc"/><circle cx="167" cy="110" r="3" fill="#fff"/>`,
 };
+const PROP = {
+  thermometer: () => `<rect x="163" y="112" width="9" height="58" rx="4.5" fill="#fff" stroke="#94a3b8" stroke-width="1.5"/><rect x="166" y="124" width="3" height="42" rx="1.5" fill="#ef4444"/>` + [124, 132, 140, 148].map(y => `<path d="M172,${y} L169,${y}" stroke="#94a3b8" stroke-width="1"/>`).join(''),
+  plane: () => `<g class="sway"><path d="M156,148 L142,128 L150,127 L170,142 Z M178,152 L184,170 L178,170 L170,156 Z" fill="#3b82f6"/><ellipse cx="170" cy="146" rx="26" ry="7" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.5" transform="rotate(20 170 146)"/>` +
+    `<path d="M146,134 L144,124 L150,126 L154,138 Z" fill="#ef4444"/><circle cx="186" cy="153" r="2.4" fill="#7dd3fc"/><circle cx="179" cy="150" r="2.4" fill="#7dd3fc"/></g>`,
+  testtube: () => `<g class="twinkle"><circle cx="165" cy="108" r="3.5" fill="#86efac"/><circle cx="172" cy="98" r="2.6" fill="#86efac"/><circle cx="164" cy="90" r="2" fill="#86efac"/></g><rect x="161" y="114" width="13" height="56" rx="6.5" fill="rgba(255,255,255,.75)" stroke="#94a3b8" stroke-width="1.5"/><rect x="162.5" y="136" width="10" height="33" rx="5" fill="#4ade80"/><rect x="159" y="112" width="17" height="4" rx="2" fill="#94a3b8"/>`,
+  magnifier: () => `<path d="M165,178 L176,142" stroke="#78350f" stroke-width="6" stroke-linecap="round"/><circle cx="181" cy="126" r="16" fill="rgba(186,230,253,.5)" stroke="#334155" stroke-width="4.5"/><path d="M172,120 Q175,114 181,113" stroke="#fff" stroke-width="2.5" fill="none" stroke-linecap="round"/>`,
+  juggle: () => `<path d="M154,140 Q160,98 178,96 Q194,98 190,130" stroke="#c4b5fd" stroke-width="1.6" stroke-dasharray="3 3" fill="none"/><g class="shaker">` + [[154, 132, '#ef4444'], [176, 96, '#facc15'], [190, 124, '#3b82f6']].map(([x, y, c]) => `<circle cx="${x}" cy="${y}" r="7" fill="${c}"/><circle cx="${x - 2}" cy="${y - 2}" r="2" fill="#fff" opacity=".6"/>`).join('') + '</g>',
+  rocket: () => `<path d="M159,150 L150,166 L160,162 Z M175,150 L184,166 L174,162 Z" fill="#ef4444"/><path d="M167,96 C157,110 157,140 160,162 L174,162 C177,140 177,110 167,96 Z" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.5"/><path d="M161,110 Q167,102 173,110" fill="#ef4444"/><circle cx="167" cy="126" r="5" fill="#7dd3fc" stroke="#64748b" stroke-width="1.5"/>`,
+  katana: () => `<path d="M170,153 Q178,122 191,90 L195,92 Q183,124 175,155 Z" fill="#e5e7eb" stroke="#94a3b8" stroke-width="1"/><ellipse cx="172" cy="157" rx="10" ry="3.5" fill="#fbbf24" stroke="#b45309" stroke-width="1" transform="rotate(-18 172 157)"/><path d="M162,190 L171,160" stroke="#1f2937" stroke-width="6.5" stroke-linecap="round"/><path d="M163,184 L166,180 M165,178 L168,174" stroke="#f8fafc" stroke-width="1.6"/>`,
+};
 const NOTES = `<g class="notes"><text x="146" y="128" font-size="13" fill="#7c3aed">♪</text><text x="186" y="118" font-size="11" fill="#ec4899">♫</text></g>`;
 const MUSIC = {
   recorder: () => `<rect x="163" y="112" width="9" height="11" rx="3" fill="#fde68a" stroke="#b45309" stroke-width=".8"/><rect x="164" y="120" width="7" height="64" rx="3" fill="#fef3c7" stroke="#d6b98c" stroke-width=".8"/>` + [128, 135, 142, 149, 156].map(y => `<circle cx="167.5" cy="${y}" r="1.4" fill="#78350f"/>`).join('') + NOTES,
@@ -839,7 +941,7 @@ const MUSIC = {
   trumpet: () => `<g fill="url(#g-gold)" stroke="#b7791f" stroke-width="1"><rect x="134" y="155" width="50" height="6.5" rx="3"/><path d="M182,153 L199,141 L199,176 L182,164 Z"/><rect x="157" y="146" width="4.5" height="10"/><rect x="163.5" y="146" width="4.5" height="10"/><rect x="170" y="146" width="4.5" height="10"/><rect x="128" y="156" width="8" height="4.5" rx="1.5"/></g>${NOTES}`,
 };
 function armSVG(L, skin) {
-  const held = L.held !== 'none' ? L.held : L.music !== 'none' ? L.music : null;
+  const held = [L.held, L.music, L.prop].find(h => h && h !== 'none');
   if (!held && L.bracelet === 'none' && L.tattoo === 'none') return '';
   const line = shade(skin, -.28);
   const fore = `<path d="M150,222 C152,206 156,194 157,184 L178,184 C179,194 182,206 184,222 Z" fill="${skin}"/>`;
@@ -848,7 +950,7 @@ function armSVG(L, skin) {
     const fingers = [158.5, 163.2, 167.9, 172.6].map((x, i) => `<rect x="${x}" y="${150 + (i === 0 || i === 3 ? 4 : 0)}" width="4.6" height="18" rx="2.3" fill="${skin}"/>`).join('');
     return `<g class="wave">${fore}${decor}${fingers}<ellipse cx="167" cy="171" rx="10.5" ry="11" fill="${skin}"/><ellipse cx="179" cy="173" rx="3.6" ry="7" fill="${skin}" transform="rotate(40 179 173)"/></g>`;
   }
-  const thing = (HELD[held] || MUSIC[held])();
+  const thing = (HELD[held] || MUSIC[held] || PROP[held])();
   const fist = `<ellipse cx="167" cy="171" rx="10.5" ry="11" fill="${skin}"/><path d="M158.5,165 Q162.5,163 166,166 M158.5,170.5 Q162.5,168.5 166,171.5 M159.5,176 Q163,174 166,177" stroke="${line}" stroke-width="1.3" fill="none" stroke-linecap="round"/><ellipse cx="175" cy="165" rx="4" ry="6.5" fill="${skin}" stroke="${line}" stroke-width=".6" transform="rotate(25 175 165)"/>`;
   return fore + decor + thing + fist;
 }
@@ -942,7 +1044,10 @@ const frac = (n, d) => `<span class="frac"><span>${n}</span><span>${d}</span></s
 const num = (html, ans, tip) => ({ kind: 'num', html, ans, tip });
 const choice = (html, choices, correct, opts = {}) => ({ kind: 'choice', html, choices, correct, ...opts });
 const word = (text, ans, tip) => num(`<div class="qtext">${text}</div>`, ans, tip);
-const tables = () => (S.tables && S.tables.length ? S.tables : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+const TEN = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+// the times-table practice goes up to 12, division and the 60 second challenge stay with 1–10
+const tableMax = t => (t === 'kefel' ? 12 : 10);
+const tables = (max = 12) => { const t = (S.tables || []).filter(n => n <= max); return t.length ? t : TEN; };
 const GRADES = [2, 3, 4, 5, 6, 7, 8, 9];
 const GN = { 2: 'ב׳', 3: 'ג׳', 4: 'ד׳', 5: 'ה׳', 6: 'ו׳', 7: 'ז׳', 8: 'ח׳', 9: 'ט׳' };
 const rnd = x => Math.round(x * 1e6) / 1e6;
@@ -973,6 +1078,8 @@ function kefelTip(a, b) {
   const p = a * b, [x, y] = [Math.min(a, b), Math.max(a, b)];
   if (x === 7 && y === 8) return '5, 6, 7, 8 ← 56 = 7 × 8 😉';
   if (y === 10 || x === 10) return 'כפל ב-10: מוסיפים 0 בסוף המספר';
+  if (y === 11 && x < 10) return 'כפל ב-11 של ספרה אחת: כותבים את הספרה פעמיים';
+  if (y === 12 && x > 2) return `${x} × 12 = ${x} × 10 + ${x} × 2`;
   if (x === 9 || y === 9) return 'בלוח של 9 – סכום הספרות בתשובה הוא 9';
   if (x === 5 || y === 5) return 'בלוח של 5 – התשובה נגמרת ב-0 או ב-5';
   if (x === 2) return `כפל ב-2 זה כפול: ${y} + ${y}`;
@@ -981,11 +1088,11 @@ function kefelTip(a, b) {
   return `טיפ: ${x} × ${y} = ${x} × ${y - 1} + ${x}`;
 }
 function genKefel() {
-  const q = genKefelQ(); return q;
+  const q = genKefelQ(Q && Q.speed ? TEN : tables()); return q;
 }
-function genKefelQ() {
-  const a = P(tables()), b = R(1, 10), r = Math.random(), q = kefelQ(a, b, r);
-  q.fact = Math.min(a, b) + 'x' + Math.max(a, b);
+function genKefelQ(list) {
+  const a = P(list), b = R(1, a > 10 ? 12 : 10), r = Math.random(), q = kefelQ(a, b, r);
+  if (a <= 10 && b <= 10) q.fact = Math.min(a, b) + 'x' + Math.max(a, b); // the badge counts the 55 facts of 1–10
   return q;
 }
 function kefelQ(a, b, r) {
@@ -1006,7 +1113,7 @@ function genKefel2() {
   const b = R(1, 10); return Math.random() < .5 ? num(ex(`${a} × ${b} = ${SLOT}`), a * b, kefelTip(a, b)) : num(ex(`${b} × ${a} = ${SLOT}`), a * b, kefelTip(a, b));
 }
 function genDiv() {
-  let a = P(tables()); if (a === 1 && Math.random() < .7) a = R(2, 10);
+  let a = P(tables(10)); if (a === 1 && Math.random() < .7) a = R(2, 10);
   const b = R(1, 10), p = a * b, tip = `חשבו: ${a} × ? = ${p}`;
   if (Math.random() < .72) return num(ex(`${p} : ${a} = ${SLOT}`), b, tip);
   return num(ex(`${p} : ${SLOT} = ${b}`), a, `חשבו: ${b} × ? = ${p}`);
@@ -1647,7 +1754,7 @@ function markDay() { // returns true on the first visit of a new day
 }
 function bubbleText() {
   const want = [];
-  ['pet', 'head', 'held', 'music', 'outfit', 'hairColor', 'bracelet', 'glasses', 'bg', 'hairStyle', 'neck', 'tattoo'].forEach(c => CAT[c].items.forEach(i => { if (!isOwned(c, i.id)) want.push(i); }));
+  ['pet', 'head', 'held', 'music', 'outfit', 'costume', 'hat', 'prop', 'hairColor', 'bracelet', 'glasses', 'bg', 'hairStyle', 'neck', 'tattoo'].forEach(c => CAT[c].items.forEach(i => { if (!isOwned(c, i.id)) want.push(i); }));
   if (!want.length) return 'יש לי כבר הכל! איזה כיף 😍 בואו נמשיך לתרגל ולשבור שיאים!';
   const afford = want.filter(i => i.price <= S.coins);
   if (afford.length && Math.random() < .6) { const i = P(afford); return `יש מספיק מטבעות בשביל ${i.name}! 🛍️ בואו לחנות!`; }
@@ -1894,20 +2001,22 @@ function renderTopics() {
   $('#topicGrid').innerHTML =
     list.map(t => `<button class="topic" data-t="${t.id}"><span class="ti">${t.icon}</span><span class="tn">${tname(t, S.grade)}</span><span class="tc">+${t.coins} 🪙 לתרגיל</span>${statLine(t.id)}</button>`).join('') +
     `<button class="topic wide" data-t="mix"><span class="ti">🎲</span><span><span class="tn">ערבוב של הכל – כיתה ${GN[S.grade]}</span><br><span class="tc">${lo === hi ? lo : lo + '-' + hi} 🪙 לתרגיל</span></span></button>` +
-    `<button class="topic wide special" data-t="speed"><span class="ti">⏱️</span><span><span class="tn">אתגר 60 שניות – לוח הכפל</span><br><span class="tc">+2 🪙 לכל תשובה · שיא: ${S.best || 0}</span></span></button>`;
-  $$('#topicGrid .topic').forEach(b => b.onclick = () => { SND.tap(); const t = b.dataset.t; if (t === 'kefel' || t === 'div' || t === 'speed') pickTables(t); else startQuiz(t); });
+    `<button class="topic wide special" data-t="speed"><span class="ti">⏱️</span><span><span class="tn">אתגר 60 שניות – לוח הכפל</span><br><span class="tc">לוחות 1–10 · +2 🪙 לכל תשובה · שיא: ${S.best || 0}</span></span></button>`;
+  $$('#topicGrid .topic').forEach(b => b.onclick = () => { SND.tap(); const t = b.dataset.t; if (t === 'kefel' || t === 'div') pickTables(t); else startQuiz(t); });
 }
 function pickTables(t) {
-  let sel = new Set(tables());
+  const max = tableMax(t), all = Array.from({ length: max }, (_, i) => i + 1);
+  let sel = new Set(tables(max));
   const draw = () => {
-    modal(`<h2>${t === 'speed' ? '⏱️ אתגר 60 שניות' : t === 'div' ? '➗ חילוק' : '✖️ לוח הכפל'}</h2>
+    modal(`<h2>${t === 'div' ? '➗ חילוק' : '✖️ לוח הכפל'}</h2>
       <p>איזה לוחות לתרגל?</p>
-      <div class="chips">${[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => `<button class="chip ${sel.has(n) ? 'on' : ''}" data-n="${n}">${n}</button>`).join('')}</div>
-      <div class="row"><button class="btn" id="tAll">${sel.size === 10 ? 'נקה הכל' : 'בחר הכל'}</button></div>
+      <div class="chips">${all.map(n => `<button class="chip ${sel.has(n) ? 'on' : ''}" data-n="${n}">${n}</button>`).join('')}</div>
+      <div class="row"><button class="btn" id="tAll">${sel.size === max ? 'נקה הכל' : 'בחר הכל'}</button></div>
       <button class="btn big primary" id="tGo" ${sel.size ? '' : 'disabled'}>בואו נתחיל! 🚀</button>`);
     $$('#mcard .chip').forEach(c => c.onclick = () => { const n = +c.dataset.n; sel.has(n) ? sel.delete(n) : sel.add(n); SND.tap(); draw(); });
-    $('#tAll').onclick = () => { sel = sel.size === 10 ? new Set() : new Set([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]); draw(); };
-    $('#tGo').onclick = () => { S.tables = [...sel].sort((a, b) => a - b); save(); closeModal(); startQuiz(t); };
+    $('#tAll').onclick = () => { sel = sel.size === max ? new Set() : new Set(all); draw(); };
+    // the division picker has no 11 and 12, so it keeps them for the times tables
+    $('#tGo').onclick = () => { S.tables = [...sel, ...(S.tables || []).filter(n => n > max)].sort((a, b) => a - b); save(); closeModal(); startQuiz(t); };
   };
   draw();
 }
