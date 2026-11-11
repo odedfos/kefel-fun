@@ -228,7 +228,19 @@ button{font-family:inherit;color:inherit;touch-action:manipulation;cursor:pointe
 .kidrow{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:6px}
 .choice .kid{width:58px;height:58px;vertical-align:middle}
 .choice .kidrow .kid{width:46px;height:46px}
-.choice .pics.sm{font-size:1.1rem}.choices.three .pics.sm{font-size:.92rem;gap:1px 2px}
+.ask{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:10px;direction:ltr;font-size:2.4rem;font-weight:800;line-height:1.2}
+.ask .more{font-size:3.2rem}
+.hole{display:inline-block;width:.9em;height:.9em;border:3px dashed #a78bfa;border-radius:8px;background:#faf5ff;vertical-align:middle;box-sizing:border-box}
+.pics.frame{background:#fff7ed;border:2px solid #fdba74;border-radius:14px;padding:6px 8px}
+.pics.frame>span{display:flex;align-items:center;justify-content:center;width:1.15em;height:1.15em}
+.pics.xs{font-size:.62rem;gap:1px}
+.kid.sm{width:44px;height:44px}.kid.xs{width:30px;height:30px}
+.tag{display:inline-flex;align-items:center;gap:4px;background:#fef3c7;border:2px solid #f59e0b;border-radius:12px;padding:2px 8px;font-size:1.3rem;font-weight:700;direction:ltr;white-space:nowrap}
+.who{display:flex;align-items:center;justify-content:center;gap:12px;direction:ltr;font-size:2.4rem}
+.blocks{height:auto;max-width:84vw}
+.choice .clock{width:92px;height:92px}
+.choice .pics.sm{font-size:1.1rem}.choices.three .pics.sm{font-size:.82rem;gap:1px 2px}
+.nw{white-space:nowrap;display:inline-flex;align-items:center;gap:6px}
 .speak{position:absolute;top:8px;left:8px;border:none;background:#f3e8ff;border-radius:50%;width:44px;height:44px;font-size:1.3rem;box-shadow:0 3px 0 var(--line)}
 .feedback{min-height:30px;text-align:center;font-weight:800;font-size:1.15rem}
 .feedback.good{color:var(--good)}
@@ -1536,6 +1548,7 @@ function genFrac(g) {
   return P(T)();
 }
 function genNumbers(g) {
+  if (g === 1) return genNumbers1();
   const M = g === 4 ? 9999 : g <= 2 ? 99 : 999, lo = g === 4 ? 1000 : g <= 2 ? 10 : 100;
   const names = (g === 4 ? ['אלפים', 'מאות', 'עשרות', 'יחידות'] : g <= 2 ? ['עשרות', 'יחידות'] : ['מאות', 'עשרות', 'יחידות']);
   const places = names.map((nm, i) => [nm, 10 ** (names.length - 1 - i)]);
@@ -1621,6 +1634,7 @@ function clockSVG(h, m) {
 }
 const hm = (h, m) => L(`${h}:${String(m).padStart(2, '0')}`);
 function genClock(g) {
+  if (g === 1) return genClock1();
   // א׳ reads whole and half hours, ב׳ also quarters
   const h = R(1, 12), m = P(g === 1 ? [0, 0, 30] : [0, 0, 30, 30, 15, 45]), nx = h % 12 + 1, pv = (h + 10) % 12 + 1;
   const T = [
@@ -2093,27 +2107,50 @@ function genProb() {
 }
 
 /* ---------- גן חובה and כיתה א׳ ---------- */
+// Children here don't read yet, so the questions have no words: only pictures, numbers and signs,
+// in a fixed visual language – "🍎 = ?" means count the apples, an empty box is what's missing,
+// 🐘 means "where is there more". The 🔊 button reads the question out loud where the device can.
 // things to count: the picture, and its name for reading the question out loud
 const THINGS = [['🍎', 'תפוחים'], ['🎈', 'בלונים'], ['⭐', 'כוכבים'], ['🐟', 'דגים'], ['🍓', 'תותים'], ['🌸', 'פרחים'], ['🐥', 'אפרוחים'], ['🚗', 'מכוניות'], ['🍪', 'עוגיות'], ['🦋', 'פרפרים'], ['⚽', 'כדורים'], ['🐞', 'חיפושיות']];
-const NUM_WORDS = ['אפס', 'אחת', 'שתיים', 'שלוש', 'ארבע', 'חמש', 'שש', 'שבע', 'שמונה', 'תשע', 'עשר'];
 // n pictures in rows of 5 (like a ten frame), the last `gone` ones crossed out
 const pics = (e, n, gone = 0, cls = '') => `<div class="pics ${cls}" style="grid-template-columns:repeat(${Math.min(Math.max(n, 1), 5)},auto)">${Array.from({ length: n }, (_, i) => `<span${i >= n - gone ? ' class="gone"' : ''}>${e}</span>`).join('')}</div>`;
-// the text a 🔊 button reads, for children who don't read yet
+// ten boxes, k of them full: the empty ones are what's missing to 10
+const HOLE = '<span class="hole"></span>';
+const tenFrame = (e, k) => `<div class="pics frame" style="grid-template-columns:repeat(5,auto)">${Array.from({ length: 10 }, (_, i) => (i < k ? `<span>${e}</span>` : HOLE)).join('')}</div>`;
+// a big left-to-right row like "🍎 = ?"
+const ask = s => `<div class="ask">${s}</div>`;
+const row = (...parts) => `<div class="picsum">${parts.map(p => (p.startsWith('<') ? p : `<span>${p}</span>`)).join('')}</div>`;
+const MORE = ask('<span class="more">🐘</span>'); // the big elephant asks "where is there more?"
+const tag = (e, price) => `<span class="tag">${e} <b>${price}</b> ₪</span>`;
+// the text a 🔊 button reads
 const said = (q, text) => { q.say = text; return q; };
 // wrong answers close to n, inside lo..hi
 const near = (n, lo, hi) => [...shuffle([n - 1, n + 1]), ...shuffle([n - 2, n + 2, n + 3, n - 3])].filter(x => x >= lo && x <= hi);
 const PIPS = { 1: [[0, 0]], 2: [[-1, -1], [1, 1]], 3: [[-1, -1], [0, 0], [1, 1]], 4: [[-1, -1], [1, -1], [-1, 1], [1, 1]], 5: [[-1, -1], [1, -1], [0, 0], [-1, 1], [1, 1]], 6: [[-1, -1], [1, -1], [-1, 0], [1, 0], [-1, 1], [1, 1]] };
 const diceSVG = n => `<svg viewBox="-50 -50 100 100" class="kid big"><rect x="-44" y="-44" width="88" height="88" rx="18" fill="#fff" stroke="#7c3aed" stroke-width="4"/>${PIPS[n].map(([x, y]) => `<circle cx="${x * 24}" cy="${y * 24}" r="9" fill="#2e1065"/>`).join('')}</svg>`;
-// name, sides (= corners), plural
+const DOT = '<svg viewBox="0 0 20 20" class="kid xs"><circle cx="10" cy="10" r="8" fill="#2e1065"/></svg>';
+
+// name, sides (= corners), plural – the names are only for the 🔊 button
 const SHAPES = { circle: ['עיגול', 0, 'עיגולים'], triangle: ['משולש', 3, 'משולשים'], square: ['ריבוע', 4, 'ריבועים'], rect: ['מלבן', 4, 'מלבנים'], pent: ['מחומש', 5, 'מחומשים'], hex: ['משושה', 6, 'משושים'] };
 const SHAPE_COLORS = ['#f472b6', '#60a5fa', '#facc15', '#4ade80', '#fb923c', '#a78bfa'];
-function shapeSVG(k, c = P(SHAPE_COLORS), cls = 'kid big') {
-  const poly = (n, r) => Array.from({ length: n }, (_, i) => { const a = (-90 + i * 360 / n) * Math.PI / 180; return `${(r * Math.cos(a)).toFixed(1)},${(r * Math.sin(a)).toFixed(1)}`; }).join(' ');
-  const body = k === 'circle' ? '<circle r="40"' : k === 'square' ? '<rect x="-36" y="-36" width="72" height="72"'
-    : k === 'rect' ? '<rect x="-46" y="-27" width="92" height="54"'
-    : k === 'triangle' ? `<polygon transform="translate(0,9)" points="${poly(3, 48)}"` : `<polygon points="${poly(k === 'pent' ? 5 : 6, 43)}"`;
-  return `<svg viewBox="-50 -50 100 100" class="${cls}">${body} fill="${c}" stroke="#2e1065" stroke-width="3" stroke-linejoin="round"/></svg>`;
+const SIDE_COLORS = ['#e11d48', '#2563eb', '#16a34a', '#f59e0b', '#9333ea', '#0891b2'];
+function shapeVerts(k) {
+  const poly = (n, r, dy = 0) => Array.from({ length: n }, (_, i) => { const a = (-90 + i * 360 / n) * Math.PI / 180; return [+(r * Math.cos(a)).toFixed(1), +(r * Math.sin(a) + dy).toFixed(1)]; });
+  return { circle: null, square: [[-36, -36], [36, -36], [36, 36], [-36, 36]], rect: [[-46, -27], [46, -27], [46, 27], [-46, 27]], triangle: poly(3, 48, 9), pent: poly(5, 43), hex: poly(6, 43) }[k];
 }
+// mark: 'dots' puts a red dot on every corner, 'sides' paints every side in its own color
+function shapeSVG(k, c = P(SHAPE_COLORS), cls = 'kid big', mark = '') {
+  const v = shapeVerts(k), st = 'stroke="#2e1065" stroke-width="3" stroke-linejoin="round"';
+  let s = `<svg viewBox="-56 -56 112 112" class="${cls}">` + (v ? `<polygon points="${v.map(p => p.join(',')).join(' ')}" fill="${c}" ${st}/>` : `<circle r="40" fill="${c}" ${st}/>`);
+  if (v && mark === 'sides') s += v.map((p, i) => { const q = v[(i + 1) % v.length], at = t => p.map((x, j) => (x + (q[j] - x) * t).toFixed(1));
+    const [a, b] = [at(.14), at(.86)]; return `<line x1="${a[0]}" y1="${a[1]}" x2="${b[0]}" y2="${b[1]}" stroke="${SIDE_COLORS[i]}" stroke-width="8" stroke-linecap="round"/>`; }).join('');
+  if (v && mark === 'dots') s += v.map(p => `<circle cx="${p[0]}" cy="${p[1]}" r="7" fill="#e11d48" stroke="#fff" stroke-width="2"/>`).join('');
+  return s + '</svg>';
+}
+const CORNER_DOT = '<svg viewBox="0 0 20 20" class="kid xs"><circle cx="10" cy="10" r="8" fill="#e11d48"/></svg>';
+const CORNER = '<svg viewBox="0 0 40 40" class="kid sm"><path d="M8 34 L8 6 M8 34 L36 34" stroke="#2e1065" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="8" cy="34" r="6" fill="#e11d48"/></svg>';
+const SIDE = '<svg viewBox="0 0 40 20" class="kid sm"><line x1="5" y1="10" x2="35" y2="10" stroke="#2563eb" stroke-width="8" stroke-linecap="round"/></svg>';
+
 // Israeli coins: 1, 2 and 5 ₪ are silver, 10 ₪ is gold in a silver ring
 function coinSVG(v) {
   const r = { 1: 34, 2: 38, 5: 42, 10: 46 }[v];
@@ -2128,45 +2165,52 @@ function coinSet(max = 20) {
   for (let i = R(2, 4); i > 0; i--) { const ok = [1, 2, 5, 10].filter(v => t + v <= max); if (!ok.length) break; const v = P(ok); vals.push(v); t += v; }
   return [vals.sort((a, b) => b - a), t];
 }
+// tens and ones: t rods of 10 cubes and u single cubes
+function blocksSVG(t, u) {
+  const C = 12, W = t * 20 + (u ? 40 : 0);
+  let s = `<svg viewBox="-3 -3 ${W + 6} ${10 * C + 6}" class="blocks" style="width:${Math.round((W + 6) * 1.25)}px">`;
+  for (let i = 0; i < t; i++) {
+    s += `<rect x="${i * 20}" y="0" width="${C}" height="${10 * C}" fill="#60a5fa" stroke="#1e3a8a" stroke-width="1.6" rx="2"/>`;
+    for (let j = 1; j < 10; j++) s += `<line x1="${i * 20}" y1="${j * C}" x2="${i * 20 + C}" y2="${j * C}" stroke="#1e3a8a" stroke-width="1"/>`;
+  }
+  for (let k = 0; k < u; k++) s += `<rect x="${t * 20 + 10 + (k % 2) * 16}" y="${10 * C - C - Math.floor(k / 2) * 16}" width="${C}" height="${C}" fill="#fbbf24" stroke="#92400e" stroke-width="1.6" rx="2"/>`;
+  return s + '</svg>';
+}
 
 function genCount() {
   const [e, w] = P(THINGS), n = R(1, 10);
   return P([
-    () => { const q = `<div class="sub">כמה ${e} יש?</div>${pics(e, n)}`, tip = 'סופרים כל אחד פעם אחת – אפשר להצביע עם האצבע';
+    () => { const q = pics(e, n) + ask(`${e} = ${SLOT}`), tip = 'סופרים כל אחד פעם אחת – אפשר להצביע עם האצבע';
       return said(Math.random() < .5 ? choiceOf(q, n, near(n, 1, 10), { n: 3, tip }) : num(q, n, tip), `כמה ${w} יש?`); },
-    () => { const k = R(1, 6); return said(choiceOf(`<div class="sub">כמה נקודות יש בקובייה?</div>${diceSVG(k)}`, k, near(k, 1, 6), { n: 3, tip: 'סופרים את הנקודות' }), 'כמה נקודות יש בקובייה?'); },
-    () => { const k = R(2, 9); return said(choiceOf(`<div class="qtext">איפה יש <b>${k}</b> ${e}?</div>`, pics(e, k, 0, 'sm'), near(k, 1, 10).map(x => pics(e, x, 0, 'sm')), { n: 3, tip: 'סופרים בכל קבוצה' }), `איפה יש ${k} ${w}?`); },
-    () => said(choiceOf(`<div class="qtext">איפה המספר ${NUM_WORDS[n]}?</div>`, n, near(n, 0, 10), { n: 3 }), `איפה המספר ${NUM_WORDS[n]}?`),
-    () => { const k = R(1, 9); return said(num(`<div class="sub">כמה ${e} צריך להוסיף כדי שיהיו 10?</div>${pics(e, k)}`, 10 - k, 'בשורה מלאה יש 5, ובשתי שורות מלאות יש 10'), `כמה ${w} צריך להוסיף כדי שיהיו עשר?`); },
+    () => { const k = R(1, 6); return said(choiceOf(diceSVG(k) + ask(`${DOT} = ${SLOT}`), k, near(k, 1, 6), { n: 3, tip: 'סופרים את הנקודות' }), 'כמה נקודות יש בקובייה?'); },
+    () => { const k = R(2, 9); return said(choiceOf(ask(`<b>${k}</b> = ${SLOT}`), pics(e, k, 0, 'sm'), near(k, 1, 10).map(x => pics(e, x, 0, 'sm')), { n: 3, tip: 'סופרים בכל קבוצה' }), `איפה יש ${k} ${w}?`); },
+    () => { const k = R(1, 9); return said(num(tenFrame(e, k) + ask(`${HOLE} = ${SLOT}`), 10 - k, 'סופרים את הריבועים הריקים'), 'כמה ריבועים ריקים יש?'); },
   ])();
 }
 function genMore() {
   const [e, w] = P(THINGS);
   return P([
-    () => { let a = R(1, 9), b = R(1, 9); while (b === a) b = R(1, 9); const more = Math.random() < .6, t = `איפה יש ${more ? 'יותר' : 'פחות'}`;
-      return said(choice(`<div class="sub">${t} ${e}?</div>`, [pics(e, a, 0, 'sm'), pics(e, b, 0, 'sm')], more === (a > b) ? 0 : 1, { tip: 'סופרים בכל קבוצה ומשווים' }), `${t} ${w}?`); },
-    () => { let a = R(0, 10), b = R(0, 10); while (b === a) b = R(0, 10); const big = Math.random() < .6, t = `איזה מספר ${big ? 'גדול' : 'קטן'} יותר?`;
-      return said(choice(`<div class="sub">${t}</div>`, [a, b], big === (a > b) ? 0 : 1, { tip: 'המספר שבא אחר כך בספירה – גדול יותר' }), t); },
-    () => { const n = R(1, 9), up = Math.random() < .5, t = `איזה מספר בא ${up ? 'אחרי' : 'לפני'}`;
-      return said(num(`<div class="qtext">${t} <b>${n}</b>?</div>`, up ? n + 1 : n - 1, up ? `סופרים: ... ${n}, ?` : `סופרים: ?, ${n} ...`), `${t} ${n}?`); },
+    () => { let a = R(1, 9), b = R(1, 9); while (b === a) b = R(1, 9);
+      return said(choice(MORE, [pics(e, a, 0, 'sm'), pics(e, b, 0, 'sm')], a > b ? 0 : 1, { tip: 'הפיל מחפש איפה יש יותר' }), `איפה יש יותר ${w}?`); },
+    () => { let a = R(1, 10), b = R(1, 10); while (b === a) b = R(1, 10); const opt = x => `${x}${pics('🔵', x, 0, 'xs')}`;
+      return said(choice(MORE, [opt(a), opt(b)], a > b ? 0 : 1, { tip: 'המספר שבא אחר כך בספירה – גדול יותר' }), 'איזה מספר גדול יותר?'); },
+    () => { const n = R(1, 9), up = Math.random() < .5, seq = up ? [n - 1, n, n + 1] : [n - 1, n, n + 1], m = up ? 2 : 0;
+      return said(num(`<div class="seq">${seq.map((v, i) => `<span>${i === m ? SLOT : v}</span>`).join('')}</div>`, seq[m], 'סופרים לפי הסדר'), up ? `איזה מספר בא אחרי ${n}?` : `איזה מספר בא לפני ${n}?`); },
     () => { const st = R(0, 5), m = R(1, 4), seq = [0, 1, 2, 3, 4, 5].map(i => st + i);
-      return said(num(`<div class="sub">איזה מספר חסר?</div><div class="seq">${seq.map((v, i) => `<span>${i === m ? SLOT : v}</span>`).join('')}</div>`, seq[m], 'סופרים לפי הסדר'), 'איזה מספר חסר?'); },
-    () => { const a = R(2, 6), same = Math.random() < .5, b = same ? a : a + P([-1, 1]), [e2] = P(THINGS.filter(x => x[0] !== e));
-      return said(choice(`<div class="sub">בשתי הקבוצות יש אותו מספר?</div><div class="picsum">${pics(e, a)}${pics(e2, b)}</div>`, ['כן', 'לא'], same ? 0 : 1, { txt: true, tip: 'סופרים כל קבוצה ומשווים' }), 'בשתי הקבוצות יש אותו מספר?'); },
+      return said(num(`<div class="seq">${seq.map((v, i) => `<span>${i === m ? SLOT : v}</span>`).join('')}</div>`, seq[m], 'סופרים לפי הסדר'), 'איזה מספר חסר?'); },
+    () => { const a = R(2, 7), [e2] = P(THINGS.filter(x => x[0] !== e));
+      return said(choiceOf(pics(e, a) + ask(`= ${SLOT}`), pics(e2, a, 0, 'sm'), near(a, 1, 9).map(x => pics(e2, x, 0, 'sm')), { n: 3, tip: 'מחפשים קבוצה עם אותו מספר' }), 'איפה יש אותו מספר?'); },
   ])();
 }
 // גן חובה: adding and taking away up to 10, mostly with pictures
 function genAddSub0() {
-  const [e, w] = P(THINGS), pic = Math.random() < .6;
-  if (pic && Math.random() < .5) { const a = R(1, 5), b = R(1, Math.min(5, 10 - a));
-    return said(num(`<div class="sub">כמה ${e} יש ביחד?</div><div class="picsum">${pics(e, a)}<span>+</span>${pics(e, b)}</div>`, a + b, `סופרים את כל ה${e} ביחד`), `${a} ${w} ועוד ${b}. כמה יש ביחד?`); }
-  if (pic) { const n = R(3, 10), k = R(1, n - 1);
-    return said(num(`<div class="sub">היו ${n}, מחקנו ${k}. כמה נשארו?</div>${pics(e, n, k)}`, n - k, `סופרים רק את ה${e} שלא מחוקים`), `היו ${n} ${w}, מחקנו ${k}. כמה נשארו?`); }
-  return P([
-    () => { const a = R(0, 5), b = R(1, Math.min(5, 10 - a)); return said(num(ex(`${a} + ${b} = ${SLOT}`), a + b, `מתחילים מ-${a} וסופרים עוד ${b}`), `${a} ועוד ${b}`); },
-    () => { const a = R(2, 10), b = R(1, Math.min(5, a)); return said(num(ex(`${a} − ${b} = ${SLOT}`), a - b, `מתחילים מ-${a} וסופרים ${b} אחורה`), `${a} פחות ${b}`); },
-    () => { const n = R(0, 9); return said(num(`<div class="qtext">כמה זה ${n} ועוד 1?</div>`, n + 1, 'ועוד 1 – זה המספר הבא בספירה'), `כמה זה ${n} ועוד אחד?`); },
-  ])();
+  const [e, w] = P(THINGS), r = Math.random();
+  if (r < .35) { const a = R(1, 5), b = R(1, Math.min(5, 10 - a));
+    return said(num(row(pics(e, a), '+', pics(e, b), '=', SLOT), a + b, `סופרים את כל ה${e} ביחד`), `${a} ${w} ועוד ${b}. כמה יש ביחד?`); }
+  if (r < .6) { const n = R(3, 10), k = R(1, n - 1);
+    return said(num(pics(e, n, k) + ex(`${n} − ${k} = ${SLOT}`), n - k, `סופרים רק את ה${e} שלא מחוקים`), `${n} פחות ${k}`); }
+  if (r < .8) { const a = R(0, 5), b = R(1, Math.min(5, 10 - a)); return said(num(ex(`${a} + ${b} = ${SLOT}`), a + b, `מתחילים מ-${a} וסופרים עוד ${b}`), `${a} ועוד ${b}`); }
+  const a = R(2, 10), b = R(1, Math.min(5, a)); return said(num(ex(`${a} − ${b} = ${SLOT}`), a - b, `מתחילים מ-${a} וסופרים ${b} אחורה`), `${a} פחות ${b}`);
 }
 // כיתה א׳: up to 20, making 10, whole tens
 function genAddSub1() {
@@ -2190,22 +2234,43 @@ function genQuick10() {
   const a = R(0, 10), b = R(0, 10 - a);
   return Math.random() < .55 ? num(ex(`${a} + ${b} = ${SLOT}`), a + b) : num(ex(`${a + b} − ${b} = ${SLOT}`), a);
 }
+// כיתה א׳: numbers to 100 with tens and ones blocks, neighbours, comparing and the number line
+function genNumbers1() {
+  const t = R(1, 9), u = R(0, 9), n = 10 * t + u;
+  return P([
+    () => num(blocksSVG(t, u) + ask(`= ${SLOT}`), n, `${t} עשרות (מקלות של 10) ו-${u} יחידות`),
+    () => { const sw = 10 * u + t; return choiceOf(blocksSVG(t, u) + ask(`= ${SLOT}`), n, [sw >= 10 && sw !== n ? sw : n + 1, n + 10 <= 99 ? n + 10 : n - 1, n - 10 >= 10 ? n - 10 : n + 2], { n: 3, tip: `ספרת העשרות היא מספר המקלות: ${t}` }); },
+    () => { const k = R(2, 98), m = R(0, 2), seq = [k - 1, k, k + 1];
+      return num(`<div class="seq">${seq.map((v, i) => `<span>${i === m ? SLOT : v}</span>`).join('')}</div>`, seq[m], 'המספר הבא גדול ב-1, המספר הקודם קטן ב-1'); },
+    () => { const x = R(10, 99); let y; const r = Math.random();
+      if (r < .15) y = x; else if (r < .5 && x % 11) y = Number(String(x).split('').reverse().join('')); else y = x + P([-10, -1, 1, 10]);
+      if (y < 1 || y > 99) y = x + 1;
+      return choice(ex(`${x} ${SLOT} ${y}`), ['>', '<', '='], x > y ? 0 : x < y ? 1 : 2, { tip: 'הפה של הסימן פתוח לכיוון המספר הגדול' }); },
+    () => { const i = P([1, 2, 3, 4, 6, 7, 8, 9]), tens = Math.random() < .5, lo = tens ? 0 : 10 * R(0, 9);
+      return num(numLineSVG(lo, tens ? 10 : 1, i), lo + i * (tens ? 10 : 1), `כל קפיצה בין שני קווים היא ${tens ? 10 : 1}`); },
+    () => Math.random() < .5 ? num(ex(`${10 * t} + ${u} = ${SLOT}`), n, 'עשרות ויחידות') : num(ex(`${n} = ${10 * t} + ${SLOT}`), u, `${n} זה ${t} עשרות ועוד יחידות`),
+  ])();
+}
+// כיתה א׳: whole and half hours, from the clock to the numbers and back
+function genClock1() {
+  const h = R(1, 12), m = P([0, 0, 30]), nx = h % 12 + 1, pv = (h + 10) % 12 + 1, TIP = 'המחוג הקצר מראה את השעה, המחוג הארוך מראה את הדקות';
+  if (Math.random() < .6) return choiceOf(clockSVG(h, m) + ask(`= ${SLOT}`), hm(h, m), [hm(m ? 6 : 12, h * 5 % 60), hm(nx, m), hm(h, m ? 0 : 30), hm(pv, m)], { n: 3, txt: true, tip: TIP });
+  const opts = [[h, m], [nx, m], [h, m ? 0 : 30], [pv, m]].slice(0, 3);
+  return choiceOf(ask(`${hm(h, m)} = ${SLOT}`), clockSVG(...opts[0]), opts.slice(1).map(o => clockSVG(...o)), { n: 3, tip: TIP });
+}
 function genShapes(g) {
   const kinds = g ? ['circle', 'triangle', 'square', 'rect', 'pent', 'hex'] : ['circle', 'triangle', 'square', 'rect'];
-  // a square is also a rectangle, so these two never appear as each other's wrong answer
+  // a square is also a rectangle, so these two never stand for each other
   const twin = { square: 'rect', rect: 'square' }, k = P(kinds), [nm, sides, many] = SHAPES[k], others = shuffle(kinds.filter(x => x !== k && x !== twin[k]));
   const T = [
-    () => said(choiceOf(`<div class="sub">איזו צורה זו?</div>${shapeSVG(k)}`, nm, others.map(x => SHAPES[x][0]), { n: 3, txt: true }), 'איזו צורה זו?'),
-    () => { const c = P(SHAPE_COLORS); return said(choiceOf(`<div class="qtext">איפה ה${nm}?</div>`, shapeSVG(k, c, 'kid'), others.map(x => shapeSVG(x, c, 'kid')), { n: 3 }), `איפה ה${nm}?`); },
+    () => { const cs = shuffle(SHAPE_COLORS); // the same shape in another color – the colors don't give it away
+      return said(choiceOf(shapeSVG(k, cs[0]) + ask(`= ${SLOT}`), shapeSVG(k, cs[1], 'kid'), others.map((x, i) => shapeSVG(x, cs[2 + i], 'kid')), { n: 3, tip: `מחפשים עוד ${nm}` }), 'איפה יש צורה כמו זאת?'); },
     () => { const n = R(1, g ? 6 : 4), list = shuffle([...Array(n).fill(k), ...Array.from({ length: R(2, 4) }, () => P(others))]);
-      return said(num(`<div class="qtext">כמה ${many} יש?</div><div class="kidrow">${list.map(x => shapeSVG(x, undefined, 'kid')).join('')}</div>`, n, `סופרים רק את ה${many}`), `כמה ${many} יש?`); },
-    () => said(num(`<div class="qtext">כמה ${g ? 'קודקודים (פינות)' : 'פינות'} יש ל${nm}?</div>${shapeSVG(k)}`, sides, sides ? 'סופרים את הפינות, ומסמנים כל פינה שכבר ספרנו' : 'לעיגול אין פינות בכלל'), `כמה פינות יש ל${nm}?`),
+      return said(num(`<div class="kidrow">${list.map(x => shapeSVG(x, undefined, 'kid')).join('')}</div>` + ask(`${shapeSVG(k, '#fff', 'kid sm')} = ${SLOT}`), n, `סופרים רק את ה${many}`), `כמה ${many} יש?`); },
+    () => g ? num(shapeSVG(k) + ask(`${CORNER} = ${SLOT}`), sides, sides ? 'פינה (קודקוד) היא המקום שבו שני קווים נפגשים' : 'לעיגול אין פינות בכלל')
+      : said(num(shapeSVG(k, undefined, 'kid big', 'dots') + ask(`${CORNER_DOT} = ${SLOT}`), sides, sides ? 'סופרים את הנקודות האדומות בפינות' : 'לעיגול אין פינות בכלל'), `כמה פינות יש ל${nm}?`),
   ];
-  if (g) T.push(
-    () => num(`<div class="qtext">כמה צלעות יש ל${nm}?</div>${shapeSVG(k)}`, sides, sides ? 'הצלעות הן הקווים הישרים מסביב לצורה' : 'לעיגול אין צלעות ישרות'),
-    () => { const k2 = P(['triangle', 'square', 'pent', 'hex']), s = SHAPES[k2][1], c = P(SHAPE_COLORS);
-      return choiceOf(`<div class="qtext">לאיזו צורה יש ${s} צלעות?</div>`, shapeSVG(k2, c, 'kid'), shuffle(['circle', 'triangle', 'square', 'pent', 'hex'].filter(x => x !== k2)).map(x => shapeSVG(x, c, 'kid')), { n: 3, tip: 'סופרים את הקווים הישרים בכל צורה' }); },
-  );
+  if (g) T.push(() => { const k2 = P(kinds.filter(x => x !== 'circle')); return num(shapeSVG(k2, '#fff', 'kid big', 'sides') + ask(`${SIDE} = ${SLOT}`), SHAPES[k2][1], 'כל צלע צבועה בצבע אחר – סופרים את הצבעים'); });
   return P(T)();
 }
 function genPattern(g) {
@@ -2215,58 +2280,54 @@ function genPattern(g) {
       const unit = P(g ? [[0, 1], [0, 0, 1], [0, 1, 1], [0, 1, 2], [0, 0, 1, 1]] : [[0, 1], [0, 1], [0, 0, 1], [0, 1, 2]]);
       const shown = unit.length * 2 + R(0, unit.length - 1), items = Array.from({ length: shown }, (_, i) => pool[unit[i % unit.length]]);
       const used = [...new Set(unit)].map(i => pool[i]), right = pool[unit[shown % unit.length]];
-      return said(choiceOf(`<div class="sub">מה בא אחר כך?</div><div class="seq">${items.map(x => `<span>${x}</span>`).join('')}<span>${SLOT}</span></div>`, right, [...used.filter(x => x !== right), pool[5]], { n: 3, tip: 'מחפשים מה חוזר על עצמו' }), 'מה בא אחר כך?');
+      return said(choiceOf(`<div class="seq">${items.map(x => `<span>${x}</span>`).join('')}<span>${SLOT}</span></div>`, right, [...used.filter(x => x !== right), pool[5]], { n: 3, tip: 'מחפשים מה חוזר על עצמו' }), 'מה בא אחר כך?');
     },
     () => { // counting on (or back): 1, 2, 3, ?, 5 – in א׳ also by 2, 5 and 10
       const st = g ? P([1, 1, 2, 5, 10]) : 1, n = 5, a = g ? (st === 1 ? R(1, 95) : st * R(0, 100 / st - n + 1)) : R(0, 6);
       const seq = Array.from({ length: n }, (_, i) => a + i * st); if (Math.random() < (g ? .35 : .2)) seq.reverse();
       const m = R(1, n - 1), up = seq[1] > seq[0];
-      return said(num(`<div class="sub">איזה מספר חסר?</div><div class="seq">${seq.map((v, i) => `<span>${i === m ? SLOT : v}</span>`).join('')}</div>`, seq[m],
+      return said(num(`<div class="seq">${seq.map((v, i) => `<span>${i === m ? SLOT : v}</span>`).join('')}</div>`, seq[m],
         st === 1 ? (up ? 'סופרים קדימה' : 'סופרים אחורה') : `קופצים ${up ? 'קדימה' : 'אחורה'} ב-${st} כל פעם`), 'איזה מספר חסר?');
     },
   ];
   return P(T)();
 }
 function genMoney() {
-  const [N, f] = P(NAMES), G = (m, w) => (f ? w : m);
+  const ITEMS = ['🍦', '🧃', '🍭', '🧸', '📒', '✏️', '🎈', '🍫'];
   return P([
-    () => { const [vals, t] = coinSet(); return num(`<div class="sub">כמה שקלים יש כאן?</div>${coinRow(vals)}`, t, 'מתחילים מהמטבע הגדול וממשיכים לספור'); },
-    () => { const [vals, t] = coinSet(); return num(`<div class="sub">כמה שקלים יש כאן?</div>${coinRow(vals)}`, t, 'מתחילים מהמטבע הגדול וממשיכים לספור'); },
-    () => { const [big, small] = P([[2, 1], [5, 1], [10, 1], [10, 2], [10, 5]]);
-      return num(`<div class="qtext">כמה מטבעות של ${small} ₪ צריך כדי לקבל ${big} ₪?</div>${coinRow([big, small])}`, big / small, Array(big / small).fill(small).join(' + ') + ' = ' + big); },
-    () => { const has = P([10, 10, 20]), cost = R(2, has - 1); return word(`ל${N} יש ${has} ₪. ${G('הוא קנה', 'היא קנתה')} גלידה ב-${cost} ₪. כמה כסף נשאר ל${N}?`, has - cost, `${has} − ${cost}`); },
-    () => { const a = R(2, 9), b = R(2, 10 - a + 5); return word(`מחברת עולה ${a} ₪, ועיפרון עולה ${b} ₪. כמה עולים מחברת ועיפרון ביחד?`, a + b, `${a} + ${b}`); },
+    () => { const [vals, t] = coinSet(); return num(coinRow(vals) + ask(`= <span class="nw">${SLOT} ₪</span>`), t, 'מתחילים מהמטבע הגדול וממשיכים לספור'); },
+    () => { const [vals, t] = coinSet(); return num(coinRow(vals) + ask(`= <span class="nw">${SLOT} ₪</span>`), t, 'מתחילים מהמטבע הגדול וממשיכים לספור'); },
+    () => { const has = P([10, 10, 20]), cost = R(2, has - 1); // pay with the coins, what's left?
+      return num(row(coinRow(has === 20 ? [10, 10] : [10]), '−', tag(P(ITEMS), cost), `<span class="nw">= ${SLOT} ₪</span>`), has - cost, `${has} − ${cost}`); },
+    () => { const [x, y] = shuffle(ITEMS), a = R(1, 9), b = R(1, 10 - a + 5); return num(row(tag(x, a), '+', tag(y, b), `<span class="nw">= ${SLOT} ₪</span>`), a + b, `${a} + ${b}`); },
     () => { let s1, s2; do { s1 = coinSet(15); s2 = coinSet(15); } while (s1[1] === s2[1]);
-      return choice('<div class="sub">איפה יש יותר כסף?</div>', [coinRow(s1[0]), coinRow(s2[0])], s1[1] > s2[1] ? 0 : 1, { tip: `סופרים כמה שקלים יש בכל צד: ${s1[1]} ו-${s2[1]}` }); },
+      return said(choice(MORE, [coinRow(s1[0]), coinRow(s2[0])], s1[1] > s2[1] ? 0 : 1, { tip: `סופרים כמה שקלים יש בכל צד: ${s1[1]} ו-${s2[1]}` }), 'איפה יש יותר כסף?'); },
   ])();
 }
+// stories told with pictures – nothing to read
 function genWord0() {
-  const [N, f] = P(NAMES), G = (m, w) => (f ? w : m), [e, w] = P(THINGS);
-  const T = [
-    () => { const a = R(1, 5), b = R(1, Math.min(5, 10 - a)), t = `ל${N} יש ${a} ${w}. ${G('הוא קיבל', 'היא קיבלה')} עוד ${b}. כמה ${w} יש ל${N} עכשיו?`;
-      return said(num(`<div class="qtext">${t}</div><div class="picsum">${pics(e, a)}<span>+</span>${pics(e, b)}</div>`, a + b, 'סופרים את כולם ביחד'), t); },
-    () => { const n = R(3, 10), k = R(1, n - 1), t = `על השולחן היו ${n} ${w}. ${N} ${G('לקח', 'לקחה')} ${k}. כמה ${w} נשארו על השולחן?`;
-      return said(num(`<div class="qtext">${t}</div>${pics(e, n, k)}`, n - k, 'סופרים את מה שנשאר'), t); },
-    () => { const n = R(3, 9), k = R(1, n - 1), t = `על העץ ישבו ${n} ציפורים. ${k} ציפורים עפו. כמה ציפורים נשארו על העץ?`;
-      return said(num(`<div class="qtext">${t}</div>${pics('🐦', n, k)}`, n - k, 'סופרים את הציפורים שלא עפו'), t); },
-    () => { const age = R(4, 7), t = `${N} ${G('בן', 'בת')} ${age}. ${G('בן', 'בת')} כמה ${G('הוא יהיה', 'היא תהיה')} בעוד שנה?`;
-      return said(num(`<div class="qtext">${t}</div><div class="pics">🎂</div>`, age + 1, `${age} ועוד 1`), t); },
-    () => { const [N2] = P(NAMES.filter(x => x[0] !== N)); let a = R(1, 8), b = R(1, 8); while (b === a) b = R(1, 8); const t = `ל${N} יש ${a} ${w}, ול${N2} יש ${b} ${w}. למי יש יותר?`;
-      return said(choice(`<div class="qtext">${t}</div><div class="picsum">${pics(e, a)}${pics(e, b)}</div>`, [N, N2], a > b ? 0 : 1, { txt: true, tip: 'סופרים ומשווים' }), t); },
-  ];
-  return P(T)();
+  const [e, w] = P(THINGS);
+  return P([
+    () => { const [a1, a2] = shuffle(['👧', '👦', '🧒', '👶']); let a = R(1, 8), b = R(1, 8); while (b === a) b = R(1, 8);
+      return said(choice(`<div class="who"><span>${a1}</span>${pics(e, a, 0, 'sm')}</div><div class="who"><span>${a2}</span>${pics(e, b, 0, 'sm')}</div>` + MORE, [a1, a2], a > b ? 0 : 1, { tip: 'סופרים לכל ילד ומשווים' }), `למי יש יותר ${w}?`); },
+    () => { const n = R(3, 9), k = R(1, n - 1);
+      return said(num(row('🌳', pics('🐦', n)) + row('−', pics('🐦', k), '💨', '=', SLOT), n - k, 'כמה ציפורים נשארו על העץ אחרי שחלק עפו?'), `על העץ ישבו ${n} ציפורים, ${k} עפו. כמה נשארו?`); },
+    () => { const age = R(3, 6);
+      return said(num(row('🎂', pics('🕯️', age))+ row('+', '🕯️', '=', SLOT), age + 1, `${age} ועוד 1`), `על העוגה יש ${age} נרות. הוסיפו עוד נר. כמה נרות יש עכשיו?`); },
+    () => { const n = R(3, 9), k = R(1, n - 1);
+      return said(num(row(pics('🎈', n, k)) + ask(`🎈 = ${SLOT}`), n - k, 'הבלונים המחוקים התפוצצו – סופרים רק את מי שנשאר'), `היו ${n} בלונים, ${k} התפוצצו. כמה נשארו?`); },
+    () => { const a = R(1, 5), b = R(1, Math.min(5, 10 - a));
+      return said(num(row('🧺', pics(e, a)) + row('+', pics(e, b), '=', SLOT), a + b, 'סופרים את כולם ביחד'), `בסל יש ${a} ${w}, הוסיפו עוד ${b}. כמה יש בסל?`); },
+  ])();
 }
 function genWord1() {
-  const [N, f] = P(NAMES), G = (m, w) => (f ? w : m);
   return P([
-    () => { const x = R(5, 12), y = R(3, 20 - x); return word(`ל${N} היו ${x} מדבקות. ${G('הוא קיבל', 'היא קיבלה')} עוד ${y} מדבקות. כמה מדבקות יש ל${N} עכשיו?`, x + y, `${x} + ${y}`); },
-    () => { const x = R(8, 20), y = R(2, x - 3); return word(`במסיבה היו ${x} בלונים. ${y} בלונים התפוצצו. כמה בלונים נשארו?`, x - y, `${x} − ${y}`); },
-    () => { const a = R(2, 9); return word(`${N} ${G('קנה', 'קנתה')} ${a} חבילות של מדבקות, ובכל חבילה 10 מדבקות. כמה מדבקות ${G('קנה', 'קנתה')} ${N}?`, 10 * a, `${a} עשרות`); },
-    () => { const x = R(5, 10), y = R(5, 10); return word(`בקבוצת הכדורגל יש ${x} בנים ו-${y} בנות. כמה ילדים יש בקבוצה?`, x + y, `${x} + ${y}`); },
-    () => { const n = R(2, 6); return word(`לכל אופניים יש 2 גלגלים. כמה גלגלים יש ל-${n} אופניים?`, 2 * n, Array(n).fill(2).join(' + ')); },
-    () => { const t = R(11, 20), a = R(3, t - 2); return word(`ספר עולה ${t} ₪. ל${N} יש ${a} ₪. כמה כסף חסר ל${N} כדי לקנות את הספר?`, t - a, `${a} + ? = ${t}`); },
-    () => { const a = R(5, 12), b = R(2, 6), c = R(1, a); return word(`באוטובוס היו ${a} נוסעים. בתחנה עלו ${b} נוסעים וירדו ${c}. כמה נוסעים יש עכשיו באוטובוס?`, a + b - c, `${a} + ${b} − ${c}`); },
-    () => { const x = R(4, 10), z = R(3, 10); return word(`${N} ${G('אסף', 'אספה')} ${x} צדפים בבוקר, ועוד ${z} צדפים אחר הצהריים. כמה צדפים ${G('אסף', 'אספה')} ${N} בסך הכל?`, x + z, `${x} + ${z}`); },
+    () => { const x = R(5, 10), y = R(3, Math.min(10, 20 - x)); return num(row(pics('⭐', x), '+', pics('⭐', y), '=', SLOT), x + y, `${x} + ${y}`); },
+    () => { const n = R(8, 20), k = R(2, n - 3); return num(pics('🎈', n, k) + ex(`${n} − ${k} = ${SLOT}`), n - k, 'הבלונים המחוקים התפוצצו'); },
+    () => { const t = R(1, 5), u = R(0, 9); return num(row(...Array(t).fill('<span class="tag">🖍️ <b>10</b></span>'), ...(u ? ['+', pics('🖍️', u)] : []), '=', SLOT), 10 * t + u, `${t} קופסאות של 10${u ? ` ועוד ${u}` : ''}`); },
+    () => { const n = R(2, 6); return num(pics('🚲', n) + ask(`🛞 = ${SLOT}`), 2 * n, `לכל אופניים 2 גלגלים: ${Array(n).fill(2).join(' + ')}`); },
+    () => { const x = R(3, 9), y = R(3, 9); return num(row(pics('👦', x), '+', pics('👧', y), '=', SLOT), x + y, `${x} + ${y}`); },
+    () => { const n = R(2, 5); return num(pics('🐶', n) + ask(`🐾 = ${SLOT}`), 4 * n, `לכל כלב 4 רגליים: ${Array(n).fill(4).join(' + ')}`); },
   ])();
 }
 
@@ -2300,7 +2361,7 @@ const TOPICS = [
   { id: 'lin', name: 'פונקציה קווית', icon: '📈', coins: 4, gen: genLin, grades: [8] },
   { id: 'pyth', name: 'משפט פיתגורס', icon: '📏', coins: 4, gen: genPyth, grades: [8, 9] },
   { id: 'prob', name: 'הסתברות וסטטיסטיקה', icon: '🃏', coins: 4, gen: genProb, grades: [8, 9] },
-  { id: 'word', name: 'בעיות מילוליות', icon: '📖', coins: 5, gen: genWord, grades: GRADES, names: { 0: 'סיפורים עם חשבון' } },
+  { id: 'word', name: 'בעיות מילוליות', icon: '📖', coins: 5, gen: genWord, grades: GRADES, names: { 0: 'סיפורים בתמונות', 1: 'סיפורים בתמונות' } },
 ];
 const topicById = id => TOPICS.find(t => t.id === id);
 const tname = (t, g) => (t.names && t.names[g]) || t.name;
